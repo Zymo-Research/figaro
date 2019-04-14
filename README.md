@@ -1,6 +1,9 @@
 # FIGARO
 
-The beauty of science is to make things simple.  It is with that motto in mind that we developed and present to you FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters.  FIGARO will quickly analyze error rates in a directory of FASTQ files to determine optimal trimming parameters for high-resolution targeted microbiome sequencing pipelines, such as those utilizing [DADA2](https://github.com/benjjneb/dada2 "Github") and [Deblur](https://github.com/biocore/deblur "Github").  The mission of this application is identical to the ZymoBIOMICS mission: increasing reproducibility and standardization of microbiome analysis.
+*The beauty of science is to make things simple*.  It is with that motto in mind that we developed and present to you FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters.  FIGARO will quickly analyze error rates in a directory of FASTQ files to determine optimal trimming parameters for high-resolution targeted microbiome sequencing pipelines, such as those utilizing [DADA2](https://github.com/benjjneb/dada2 "Github") and [Deblur](https://github.com/biocore/deblur "Github").  The mission of this application is identical to the [ZymoBIOMICS](https://www.zymoresearch.com/pages/zymobiomics-portfolio) mission: increasing the reproducibility and standardization of microbiome analysis.
+
+####Publication
+Please see [FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters](link/to/preprint/here "Preprint version")
 
 ## Getting Started
 As with all bioinformatics applications, the key to getting started with FIGARO is to have the right data set up in the right way.  Before getting started you will need:
@@ -66,13 +69,11 @@ Install Python packages
 pip3 install -r requirements.txt
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
-
 ## Running FIGARO
 
 #### Dockerized version
 
-FIGARO is designed to take in data through mounted directories and parameters through environment variables.  As such, the command should appear as follows:
+FIGARO is designed to take in data through mounted directories and parameters through environment variables.  As such, the command should appear as follows to run FIGARO on a 450 base amplicon generated using 20 base primers in either direction:
 
 ```
 docker container run --rm -e AMPLICONLENGTH=450 -e FORWARDPRIMERLENGTH=20 -e REVERSEPRIMERLENGTH=20 -v /path/to/fastqs:/data/input -v /path/to/output:/data/output figaro
@@ -80,62 +81,101 @@ docker container run --rm -e AMPLICONLENGTH=450 -e FORWARDPRIMERLENGTH=20 -e REV
 
 The user can set several parameters using environment variables passed into the container at runtime. The environment variables that can be passed are as follows:
 
-| Tables        | Are           | Cool  |
-| ------------- |:-------------:| -----:|
-| col 3 is      | right-aligned | $1600 |
-| col 2 is      | centered      |   $12 |
-| zebra stripes | are neat      |    $1 |
+| Variable        | Type           | Default  | Description |
+| --------------- |:--------------:|:--------:|-------------|
+AMPLICONLENGTH | integer | **REQUIRED** | The length of the amplified sequence target **not including primers**. User is required to set this.
+FORWARDPRIMERLENGTH | integer | **REQUIRED** | The length of the forward primer. User is required to set this.
+REVERSEPRIMERLENGTH | integer | **REQUIRED** | The length of the reverse primer. User is required to set this.
+OUTPUTFILENAME | string | trimParameters.json | The desired name of the JSON list of trim parameters and their scores
+INPUTDIRECTORY | string | /data/input | Directory **inside** the container with FASTQ files. You generally shouldn't have to change this.
+OUTPUTDIRECTORY | string | /data/output | Directory **inside** the container for writing output files. You generally shouldn't have to change this.
+MINIMUMOVERLAP | integer | 20 | How much you want your paired end sequences to overlap in the middle for merging
+SUBSAMPLE | integer | *See description* | What fraction of reads to analyze (1/x) from the FASTQ files. Default value will call a function that sets this based upon the size of the fastq files for a sliding scale.
+PERCENTILE | integer | 83 | The percentile to target for read filtering.  The default value of 83 will remove reads that are about 1 standard deviation worse than the average read for that direction in that position. You can generally expect a few percentage points below your percentile value of reads to pass the filtering.
 
+#### Command line version
 
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
+FIGARO will analyze an entire directory of FASTQ files on the system. Run the following command from FIGARO's directory:
 
 ```
-Give an example
+python3 figaro.py -i /path/to/fastq/directory -o /path/to/output/files -a 450 -f 20 -r 20
 ```
 
-## Deployment
+The user can set several parameters using environment variables passed into the container at runtime. The environment variables that can be passed are as follows:
 
-Add additional notes about how to deploy this on a live system
+| Flag            | Short | Type           | Default  | Description |
+|:---------------:|:-----:|:--------------:|:--------:|-------------|
+--ampliconLength | -a | integer | **REQUIRED** | The length of the amplified sequence target **not including primers**. User is required to set this.
+--forwardPrimerLength | -f | integer | **REQUIRED** | The length of the forward primer. User is required to set this.
+--reversePrimerLength | -r | integer | **REQUIRED** | The length of the reverse primer. User is required to set this.
+--outputFileName | -o | string | trimParameters.json | The desired name of the JSON list of trim parameters and their scores
+--inputDirectory | -i | string | *current working directory* | Directory with FASTQ files.
+--outputDirectory | -d | string | *current working directory* | Directory writing output files.
+--minimumOverlap | -m | integer | 20 | How much you want your paired end sequences to overlap in the middle for merging
+--subsample | -s | integer | *See description* | What fraction of reads to analyze (1/x) from the FASTQ files. Default value will call a function that sets this based upon the size of the fastq files for a sliding scale.
+--percentile | -p | integer | 83 | The percentile to target for read filtering.  The default value of 83 will remove reads that are about 1 standard deviation worse than the average read for that direction in that position. You can generally expect a few percentage points below your percentile value of reads to pass the filtering.
 
-## Built With
-
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+## FIGARO output
+Trimming parameter candidates will have the following information:
+- Forward trim position
+- Reverse trim position
+- Forward expected error value
+- Reverse expected error value
+- Percent read retention
+    - Percentage of reads expected to pass filtering with these parameters
+- Parameter score
+    - Determined by the percentage of reads expected to pass filtering with a penalty for allowed errors that grows exponentially. See our publication for more details on this formula.
+    
+After a successful run of FIGARO, you can expect the following outputs:
+- A list of trimming parameter candidates
+    - See above for data associated with trimming parameter sets
+    - This list will be output to both the console (STDOUT) and a file.
+        - The console will have one set per line, sorted by score, with the highest-scoring set first
+        - The file will have a list of parameters in JSON format (spaced for easy reading by humans), sorted by score, with the highest-scoring set first.
+    - Plots for expected error values over the course of the amplicon for both forward and reverse directions
+        - These will have the exponential regression model included as well as its r-squared
+            - This model appears to generally run a very high r-squared value. If the model has an r-squared below 0.95, something is not right.
+        - Figures will be in PNG format. I will be open to supporting additional formats in the future if there is adequate demand.
+        - These can provide a useful method to monitor sequence qualities over time.
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+We welcome and encourage contributions to this project from the microbiomics community and will happily accept and acknowledge input (and possibly provide some free kits as a thank you).  We aim to provide a positive and inclusive environment for contributors that is free of any harassment or excessively harsh criticism. Our Golden Rule: *Treat others as you would like to be treated*.
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+We use a modification of [Semantic Versioning](https://semvar.org) to identify our releases.
+
+Release identifiers will be *major.minor.patch*
+
+Major release: Newly required parameter or other change that is not entirely backwards compatible
+Minor release: New optional parameter
+Patch release: No changes to parameters
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+- **Michael M. Weinstein** - *Project Lead, Programming and Design* - [michael-weinstein](https://github.com/michael-weinstein)
+- **Aishani Prem** - *Testing, Design* - [AishaniPrem](https://github.com/AishaniPrem)
+- **Mingda Jin** - *Testing, Code Review* - [jinmingda](https://github.com/jinmingda)
+- **Shuiquan Tang** - *Design* - [shuiquantang](https://github.com/shuiquantang)
+- **Jeffrey Bhasin** - *Design, Code Review* - [jeffbhasin](https://github.com/jeffbhasin)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/Zymo-Research/figaro/contributors) who participated in this project.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the GNU GPLv3 License - see the [LICENSE](LICENSE) file for details.
+This license restricts the usage of this application for non-open sourced systems. Please contact the authors for questions related to relicensing of this software in non-open sourced systems.
 
 ## Acknowledgments
 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+We would like to thank the following, without whom this would not have happened:
+* The Python Foundation
+* The staff at Zymo Research
+* The microbiomics community for making us aware of this need
+* Our customers
 
+---------------------------------------------------------------------------------------------------------------------
+
+####If you like this software, please let us know at info@zymoresearch.com.
+####Please support our continued development of free and open-source microbiomics applications by checking out the latest microbiomics offerings from [ZymoBIOMICS](https://www.zymoresearch.com/pages/zymobiomics-portfolio)

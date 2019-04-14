@@ -59,7 +59,7 @@ def fitExponentialCurve(xValues:collections.Iterable, yValues:collections.Iterab
         plt.text(0, textYPosition, text)
         # plt.show()
         byteStream = io.BytesIO()
-        plt.savefig(byteStream, format="svg")
+        plt.savefig(byteStream, format="png")
         byteStream.seek(0)
         encodedImage = base64.b64encode(byteStream.read())
         curve = ExponentialFit(*coefficients, covariance, rSquared, encodedImage)
