@@ -79,6 +79,7 @@ docker container run --rm -e AMPLICONLENGTH=450 -e FORWARDPRIMERLENGTH=20 -e REV
 ```
 
 The user can set several parameters using environment variables passed into the container at runtime. The environment variables that can be passed are as follows:
+
 | Tables        | Are           | Cool  |
 | ------------- |:-------------:| -----:|
 | col 3 is      | right-aligned | $1600 |
