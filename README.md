@@ -2,7 +2,7 @@
 
 *The beauty of science is to make things simple*.  It is with that motto in mind that we developed and present to you FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters.  FIGARO will quickly analyze error rates in a directory of FASTQ files to determine optimal trimming parameters for high-resolution targeted microbiome sequencing pipelines, such as those utilizing [DADA2](https://github.com/benjjneb/dada2 "Github") and [Deblur](https://github.com/biocore/deblur "Github").  The mission of this application is identical to the [ZymoBIOMICS](https://www.zymoresearch.com/pages/zymobiomics-portfolio) mission: increasing the reproducibility and standardization of microbiome analysis.
 
-####Publication
+#### Publication
 Please see [FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters](link/to/preprint/here "Preprint version")
 
 ## Getting Started
@@ -32,7 +32,7 @@ The only prerequisites to running this application is a Python3 interpreter if r
 
 This application is designed to be lightweight and simple to use.  The intended use is via its Docker, but can also be run using your Python interpreter (this was written for Python 3.6.7).  For either case, you will need to  clone the FIGARO repository.  This can either be done by downloading the packaged code from Github or running the following commands in the directory where you wish to have FIGARO live:
 
-####Dockerized version
+#### Dockerized version
 
 Clone the FIGARO repository
 
@@ -51,7 +51,7 @@ Build the container
 docker build -t figaro .
 ```
 
-####Command line version
+#### Command line version
 
 Clone the FIGARO repository
 
@@ -177,5 +177,5 @@ We would like to thank the following, without whom this would not have happened:
 
 ---------------------------------------------------------------------------------------------------------------------
 
-####If you like this software, please let us know at info@zymoresearch.com.
-####Please support our continued development of free and open-source microbiomics applications by checking out the latest microbiomics offerings from [ZymoBIOMICS](https://www.zymoresearch.com/pages/zymobiomics-portfolio)
+#### If you like this software, please let us know at info@zymoresearch.com.
+#### Please support our continued development of free and open-source microbiomics applications by checking out the latest microbiomics offerings from [ZymoBIOMICS](https://www.zymoresearch.com/pages/zymobiomics-portfolio)
