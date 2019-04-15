@@ -1,5 +1,4 @@
 import logging
-import figaroDefaults.testing as default
 import figaroSupport
 
 
@@ -18,9 +17,7 @@ def getApplicationParameters():
     parameters.addParameter("subsample", int, default=default.subsample, lowerBound=-1)
     parameters.addParameter("percentile", int, default = default.percentile, lowerBound=1, upperBound=100)
     parameters.checkCreatedFileStructures()
-    ampliconLength = default.ampliconLength[parameters.amplicon.value]
-    parameters.sideLoadParameter("ampliconLength", ampliconLength)
-    combinedReadLengths = ampliconLength + parameters.minimumOverlap.value
+    combinedReadLengths = parameters.ampliconLength.value + parameters.minimumOverlap.value
     parameters.sideLoadParameter("minimumCombinedReadLength", combinedReadLengths)
     for character in parameters.outputFileName.value:
         if character not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_.-":
@@ -37,18 +34,18 @@ def getApplicationParametersFromCommandLine():
     import os
     # parse args
     parser = argparse.ArgumentParser()
-    parser.add_argument("-o", "--outputFile", help = "Output file for trim site JSON", default=default.outputFileName)
+    parser.add_argument("-o", "--outputDirectory", help = "Directory for outputs", default = os.getcwd())
     parser.add_argument("-a", "--ampliconLength", help = "Length of amplicon (not including primers)", required=True, type=int)
     parser.add_argument("-f", "--forwardPrimerLength", help = "Length of forward primer", required=True, type=int)
     parser.add_argument("-r", "--reversePrimerLength", help = "Length of reverse primer", required=True, type=int)
     parser.add_argument("-i", "--inputDirectory", help = "Directory with Fastq files to analyze", default = os.getcwd())
-    parser.add_argument("-d", "--outputDirectory", help = "Directory for outputs", default = os.getcwd())
+    parser.add_argument("-n", "--outputFileName", help = "Output file for trim site JSON", default=default.outputFileName)
     parser.add_argument("-m", "--minimumOverlap", help = "Minimum overlap between the paired-end reads", default=default.minOverlap, type=int)
     parser.add_argument("-s", "--subsample", help = "Subsampling level (will analyze approximately 1/x reads", default=default.subsample, type=int)
     parser.add_argument("-p", "--percentile", help = "Percentile to use for expected error model", default=default.percentile, type=int)
     args = parser.parse_args()
     # validate args
-    outputFile = args.outputFile
+    outputFileName = args.outputFileName
     ampliconLength = args.ampliconLength
     if not ampliconLength > 0:
         raise ValueError("Amplicon length must be a positive integer. %s was given" %ampliconLength)
@@ -75,9 +72,10 @@ def getApplicationParametersFromCommandLine():
     percentile = args.percentile
     if percentile < 0 or percentile > 100:
         raise ValueError("Percentile must be an integer value between 0 and 100. %s was given." %percentile)
+    combinedReadLengths = ampliconLength + minimumOverlap
     # side-load args into parameter types
     parameters = figaroSupport.environmentParameterParser.EnvParameters()
-    parameters.sideLoadParameter("outputFile", outputFile)
+    parameters.sideLoadParameter("outputFileName", outputFileName)
     parameters.sideLoadParameter("ampliconLength", ampliconLength)
     parameters.sideLoadParameter("forwardPrimerLength", forwardPrimerLength)
     parameters.sideLoadParameter("reversePrimerLength", reversePrimerLength)
@@ -86,6 +84,7 @@ def getApplicationParametersFromCommandLine():
     parameters.sideLoadParameter("minimumOverlap", minimumOverlap)
     parameters.sideLoadParameter("subsample", subsample)
     parameters.sideLoadParameter("percentile", percentile)
+    parameters.sideLoadParameter("minimumCombinedReadLength", combinedReadLengths)
     return parameters
 
 
@@ -176,6 +175,6 @@ if __name__ == "__main__":
     for result in resultTable:
         print(result)
     resultTableFileName = os.path.join(parameters.outputDirectory.value, parameters.outputFileName.value)
-    saveResultOutput(parameters.outputDirectory.value, parameters.outputFileName.value,resultTable,  forwardCurve, reverseCurve)
+    saveResultOutput(parameters.outputDirectory.value, parameters.outputFileName.value, resultTable, forwardCurve, reverseCurve)
     print("Run time: %s" %(datetime.datetime.now() - startTime))
     exit(0)

@@ -128,7 +128,7 @@ class Q2ArrayParallelBuilderAgent(object):
 
 def makeCombinedQ2ArrayForOneDirection(fastqList:list, sampleOrder:list, subsample:int=0, primerLength:int=0):
     import numpy
-    from ... import easyMultiprocessing
+    from . import easyMultiprocessing
     parallelBuildAgent = Q2ArrayParallelBuilderAgent(subsample, primerLength)
     firstQ2Arrays = easyMultiprocessing.parallelProcessRunner(parallelBuildAgent.makeQ2Array, fastqList)
     combinedArrayStarted = False
@@ -193,7 +193,7 @@ class NBaseArrayParallelBuilderAgent(object):
 
 def makeCombinedFirstNBaseArrayForOneDirection(fastqList:list, sampleOrder:list, subsample:int=0, primerLength:int=0):
     import numpy
-    from ... import easyMultiprocessing
+    from . import easyMultiprocessing
     parallelBuildAgent = NBaseArrayParallelBuilderAgent(subsample, primerLength)
     firstNBaseArrays = easyMultiprocessing.parallelProcessRunner(parallelBuildAgent.makeFirstNBaseArray, fastqList)
     combinedArrayStarted = False
@@ -244,7 +244,7 @@ class ExpectedErrorMatrixBuilderParallelAgent(object):
 
 def makeCombinedExpectedErrorMatrixForOneDirection(fastqList:list, sampleOrder:list, subsample:int, startPosition:int = 0, primerLength:int=0):
     import numpy
-    from ... import easyMultiprocessing
+    from . import easyMultiprocessing
     parallelBuildAgent = ExpectedErrorMatrixBuilderParallelAgent(startPosition, subsample, primerLength)
     expectedErrorMatrices = easyMultiprocessing.parallelProcessRunner(parallelBuildAgent.makeExpectedErrorMatrix, fastqList)
     combinedMatrixStarted = False
@@ -364,7 +364,7 @@ def parallelReadLengthChecker(fastq:fileNamingStandards.NamingStandard):
 
 
 def checkReadLengths(fastqList:list):
-    from ... import easyMultiprocessing
+    from . import easyMultiprocessing
     read1Data = []
     read2Data = []
     fastqReadLengthData = easyMultiprocessing.parallelProcessRunner(parallelReadLengthChecker, fastqList)

@@ -1,6 +1,6 @@
 import logging
 logger = logging.getLogger(__name__)
-from . import fileNamingStandards
+
 
 def buildQualityMatrix(path:str):
     import numpy
@@ -77,16 +77,6 @@ def makeQualityMatrix(path:str):
     fastq.close()
     qualityCountMatrix = numpy.matrix(qualityCountMatrix)
     return qualityCountMatrix
-    # plt.imshow(qualityCountMatrix, origin='lower', aspect='auto')
-    # plt.xlabel("Position")
-    # plt.ylabel("Quality (Phred)")
-    # plt.title("Read quality for %s" %path)
-    # if not testingOnly:
-    #     if outputFile:
-    #         plt.savefig(outputFile)
-    #     else:
-    #         plt.show()
-    # return qualityCountMatrix
 
 
 def makeAverageExpectedErrorLine(path:str):
@@ -97,198 +87,6 @@ def makeAverageExpectedErrorLine(path:str):
     for line in expectedErrorMatrix:
         means.append(numpy.mean(line))
     return means
-    # plt.plot(means, 'k-')
-    # plt.xlabel("Position")
-    # plt.ylabel("Average Expected Error")
-    # plt.show()
-
-
-def getDataForFastqPlots(forwardFastq:fileNamingStandards.NamingStandard, reverseFastq:fileNamingStandards.NamingStandard = None):
-    forwardQualityMatrix = makeQualityMatrix(forwardFastq.filePath)
-    forwardExpectedErrorLine = makeAverageExpectedErrorLine(forwardFastq.filePath)
-    if reverseFastq is None:
-        reverseQualityMatrix = None
-        reverseExpectedErrorLine = None
-    else:
-        reverseQualityMatrix = makeQualityMatrix(reverseFastq.filePath)
-        reverseExpectedErrorLine = makeAverageExpectedErrorLine(reverseFastq.filePath)
-    return forwardQualityMatrix, reverseQualityMatrix, forwardExpectedErrorLine, reverseExpectedErrorLine
-
-
-def generateFastqPlotPaired(forwardFastq:fileNamingStandards.NamingStandard, reverseFastq:fileNamingStandards.NamingStandard, sampleTitle:str = None, outputFile:str = None, base64Format:str = None):
-    import matplotlib.pyplot as plt
-    if base64Format:
-        import base64
-    if outputFile and base64Format:
-        outputFileFormat = outputFile.split(".")[-1]
-        if not outputFileFormat == base64Format:
-            logger.error(
-                "Cannot save plot in one format and return base64 in a different format.  Returning file save format.  Save in %s. Return base64 %s" % (
-                outputFileFormat, base64Format))
-    if sampleTitle is None:
-        sampleTitle = " ".join([str(item) for item in forwardFastq.sampleID])
-    else:
-        sampleTitle = str(sampleTitle)
-    forwardQualityMatrix, reverseQualityMatrix, forwardExpectedErrorLine, reverseExpectedErrorLine = getDataForFastqPlots(forwardFastq, reverseFastq)
-    plt.suptitle("Analysis of %s" % sampleTitle, horizontalalignment="center", fontsize=18, fontweight="bold")
-
-    #make plots for forward reads
-    plt.subplot(221)
-    plt.imshow(forwardQualityMatrix, origin='lower', aspect='auto')
-    plt.xlabel("Read 1 Position")
-    plt.ylabel("Quality (Phred)")
-    plt.title(" ", fontsize = 16) #making a whitespace buffer
-    plt.subplot(222)
-    plt.plot(forwardExpectedErrorLine, 'k-')
-    plt.xlabel("Read 1 Position")
-    plt.ylabel("Average Expected Error")
-    plt.title(" ", fontsize = 16) #making a whitespace buffer
-
-    #make plots for reverse reads
-    plt.subplot(223)
-    plt.imshow(reverseQualityMatrix, origin='lower', aspect='auto')
-    plt.xlabel("Read 2 Position")
-    plt.ylabel("Quality (Phred)")
-    #plt.title("Read quality for %s" %reverseFastq.fileName)
-    plt.subplot(224)
-    plt.plot(reverseExpectedErrorLine, 'k-')
-    plt.xlabel("Read 2 Position")
-    plt.ylabel("Average Expected Error")
-    #plt.title("Expected error for %s" % reverseFastq.fileName)
-
-    plt.tight_layout()
-    if outputFile:
-        plt.savefig(outputFile)
-        if base64Format:
-            imageFile = open(outputFile)
-            encodedFile = base64.b64encode(imageFile.read())
-            imageFile.close()
-            return encodedFile
-    elif base64Format:
-        import io
-        byteStream = io.BytesIO()
-        plt.savefig(byteStream, format=base64Format)
-        byteStream.seek(0)
-        encodedFile = base64.b64encode(byteStream.read())
-        return encodedFile
-    else:
-        plt.show()
-
-
-def generateFastqPlotSingle(forwardFastq: fileNamingStandards.NamingStandard, sampleTitle: str = None, outputFile: str = None, base64Format:str = None):
-    import matplotlib.pyplot as plt
-    if base64Format:
-        import base64
-    if outputFile and base64Format:
-        outputFileFormat = outputFile.split(".")[-1]
-        if not outputFileFormat == base64Format:
-            logger.error("Cannot save plot in one format and return base64 in a different format.  Returning file save format.  Save in %s. Return base64 %s" %(outputFileFormat, base64Format))
-    if sampleTitle is None:
-        sampleTitle = " ".join([str(item) for item in forwardFastq.sampleID])
-    else:
-        sampleTitle = str(sampleTitle)
-    forwardQualityMatrix, reverseQualityMatrix, forwardExpectedErrorLine, reverseExpectedErrorLine = getDataForFastqPlots(forwardFastq)
-    plt.suptitle(sampleTitle, horizontalalignment="center", fontsize = 18, fontweight = "bold")
-
-    # make plots for reads
-    plt.subplot(211)
-    plt.imshow(forwardQualityMatrix, origin='lower', aspect='auto')
-    plt.xlabel("Position")
-    plt.ylabel("Quality (Phred)")
-    plt.title(" ", fontsize = 16) #making a whitespace buffer
-    plt.subplot(212)
-    plt.plot(forwardExpectedErrorLine, 'k-')
-    plt.xlabel("Position")
-    plt.ylabel("Average Expected Error")
-
-    plt.tight_layout()
-    if outputFile:
-        plt.savefig(outputFile)
-        if base64Format:
-            imageFile = open(outputFile)
-            encodedFile = base64.b64encode(imageFile.read())
-            imageFile.close()
-            return encodedFile
-    elif base64Format:
-        import io
-        byteStream = io.BytesIO()
-        plt.savefig(byteStream, format=base64Format)
-        byteStream.seek(0)
-        encodedFile = base64.b64encode(byteStream.read())
-        return encodedFile
-    else:
-        plt.show()
-
-
-class ParallelPlotAgent(object):
-
-    def __init__(self, outputDirectory:str = None, base64Output:bool = False, outputFormat:str = None):
-        self.outputDirectory = outputDirectory
-        self.outputFormat = outputFormat
-        self.base64Output = base64Output
-        if outputDirectory or base64Output:
-            if not outputFormat:
-                raise ValueError("If output to file (directory) or base64 is set, an output format must be provided, but none was.")
-
-    def parallelPlotter(self, fastq:[tuple, fileNamingStandards.NamingStandard]):
-        import os
-        if type(fastq) == tuple:
-            sampleName =  "_".join([str(item) for item in fastq[0].sampleID])
-            returnFastq = fastq[0]
-        else:
-            sampleName =  "_".join([str(item) for item in fastq.sampleID])
-            returnFastq = fastq
-        if self.outputDirectory:
-            outputFileName = os.path.join(self.outputDirectory, sampleName + ".%s" %self.outputFormat)
-        else:
-            outputFileName = None
-        if self.base64Output:
-            base64Format = self.outputFormat
-        else:
-            base64Format = None
-        if type(fastq) == tuple:
-            base64EncodedPlot = generateFastqPlotPaired(fastq[0], fastq[1], outputFile=outputFileName, base64Format=base64Format)
-        else:
-            base64EncodedPlot = generateFastqPlotSingle(fastq, outputFile=outputFileName, base64Format=base64Format)
-        return returnFastq, outputFileName, base64EncodedPlot #returnValue will be None unless a base64 encoded image was returned
-
-
-def plotFastqFilesInFolder(directory:str, namingStandard:fileNamingStandards.NamingStandard, outputDirectory:str = None, base64Output:bool = False, outputFormat:str = None):
-    import os
-    from . import fastqHandler
-    from ... import easyMultiprocessing
-    if outputDirectory and not os.path.isdir(directory):
-        raise NotADirectoryError("Unable to find a directory at %s" %directory)
-    if outputDirectory and not os.path.isdir(outputDirectory):
-        raise NotADirectoryError("Unable to find a directory at %s" %outputDirectory)
-    if outputDirectory or base64Output:
-        if not outputFormat:
-            raise ValueError(
-                "If output to file (directory) or base64 is set, an output format must be provided, but none was.")
-    fastqTable = fastqHandler.getSamplePairTableFromFolder(directory, namingStandard)
-    fastqSetList = []
-    for key in fastqTable:
-        if key == "unpaired":
-            for fastq in fastqTable["unpaired"]:
-                fastqSetList.append(fastq)
-        else:
-            fastqSetList.append(fastqTable[key])
-    parallelPlotAgent = ParallelPlotAgent(outputDirectory=outputDirectory, base64Output=base64Output, outputFormat=outputFormat)
-    if outputDirectory or base64Output:
-        plotReturnValues = easyMultiprocessing.parallelProcessRunner(parallelPlotAgent.parallelPlotter, fastqSetList)
-    else:
-        plotReturnValues = [parallelPlotAgent.parallelPlotter(fastq) for fastq in fastqSetList]  #can't do parallel plotting if plotting to a display window
-    returnTable = {}
-    if outputDirectory and base64Output:
-        for fastq, outputFile, base64EncodedPlot in plotReturnValues:
-            returnTable[fastq] = (outputFile, base64EncodedPlot)
-    elif base64Output:
-        for fastq, outputFile, base64EncodedPlot in plotReturnValues:
-            returnTable[fastq] = base64EncodedPlot
-    elif outputDirectory:
-        for fastq, outputFile, base64EncodedPlot in plotReturnValues:
-            returnTable[fastq] = base64EncodedPlot
-    return returnTable
 
 
 def getEstimatedFastqFileSizeSumFromList(fastqList:list):
@@ -309,6 +107,3 @@ def getEstimatedFastqSizeSumFromDirectory(path:str):
         raise NotADirectoryError("Unable to find a directory at %s" %path)
     fastqList = fastqHandler.findSamplesInFolder(path)
     return getEstimatedFastqFileSizeSumFromList(fastqList)
-
-
-

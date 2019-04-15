@@ -126,9 +126,9 @@ The user can set several parameters using environment variables passed into the 
 --ampliconLength | -a | integer | **REQUIRED** | The length of the amplified sequence target **not including primers**. User is required to set this.
 --forwardPrimerLength | -f | integer | **REQUIRED** | The length of the forward primer. User is required to set this.
 --reversePrimerLength | -r | integer | **REQUIRED** | The length of the reverse primer. User is required to set this.
---outputFileName | -o | string | trimParameters.json | The desired name of the JSON list of trim parameters and their scores
+--outputFileName | -n | string | trimParameters.json | The desired name of the JSON list of trim parameters and their scores
 --inputDirectory | -i | string | *current working directory* | Directory with FASTQ files.
---outputDirectory | -d | string | *current working directory* | Directory writing output files.
+--outputDirectory | -o | string | *current working directory* | Directory writing output files.
 --minimumOverlap | -m | integer | 20 | How much you want your paired end sequences to overlap in the middle for merging
 --subsample | -s | integer | *See description* | What fraction of reads to analyze (1/x) from the FASTQ files. Default value will call a function that sets this based upon the size of the fastq files for a sliding scale.
 --percentile | -p | integer | 83 | The percentile to target for read filtering.  The default value of 83 will remove reads that are about 1 standard deviation worse than the average read for that direction in that position. You can generally expect a few percentage points below your percentile value of reads to pass the filtering.
