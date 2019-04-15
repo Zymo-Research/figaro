@@ -1,9 +1,27 @@
 # FIGARO
 
-*The beauty of science is to make things simple*.  It is with that motto in mind that we developed and present to you FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters.  FIGARO will quickly analyze error rates in a directory of FASTQ files to determine optimal trimming parameters for high-resolution targeted microbiome sequencing pipelines, such as those utilizing [DADA2](https://github.com/benjjneb/dada2 "Github") and [Deblur](https://github.com/biocore/deblur "Github").  The mission of this application is identical to the [ZymoBIOMICS](https://www.zymoresearch.com/pages/zymobiomics-portfolio) mission: increasing the reproducibility and standardization of microbiome analysis.
+*The beauty of science is to make things simple*.  It in this spirit that we developed and present to you FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters.  FIGARO will quickly analyze error rates in a directory of FASTQ files to determine optimal trimming parameters for high-resolution targeted microbiome sequencing pipelines, such as those utilizing [DADA2](https://github.com/benjjneb/dada2 "Github") and [Deblur](https://github.com/biocore/deblur "Github").  The mission of this application is identical to the [ZymoBIOMICS](https://www.zymoresearch.com/pages/zymobiomics-portfolio) mission: increasing the reproducibility and standardization of microbiome analysis.
 
 #### Publication
 Please see [FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters](link/to/preprint/here "Preprint version")
+
+## Quick Start Guide
+
+#### Docker
+```
+git clone https://github.com/Zymo-Research/figaro.git
+cd figaro
+docker build -t figaro .
+docker container run --rm -e AMPLICONLENGTH=[amplicon length] -e FORWARDPRIMERLENGTH=[forward primer length] -e REVERSEPRIMERLENGTH=[reverse primer length] -v /path/to/fastqs:/data/input -v /path/to/output:/data/output figaro
+```
+
+#### Command line
+```
+git clone https://github.com/Zymo-Research/figaro.git
+cd figaro
+pip3 install -r requirements.txt
+python3 figaro.py -i /path/to/fastq/directory -o /path/to/output/files -a [amplicon length] -f [forward primer length] -r [reverse primer length]
+```
 
 ## Getting Started
 As with all bioinformatics applications, the key to getting started with FIGARO is to have the right data set up in the right way.  Before getting started you will need:
