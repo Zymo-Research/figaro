@@ -3,7 +3,7 @@
 *The beauty of science is to make things simple*.  It in this spirit that we developed and present to you FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters.  FIGARO will quickly analyze error rates in a directory of FASTQ files to determine optimal trimming parameters for high-resolution targeted microbiome sequencing pipelines, such as those utilizing [DADA2](https://github.com/benjjneb/dada2 "Github") and [Deblur](https://github.com/biocore/deblur "Github").  The mission of this application is identical to the [ZymoBIOMICS](https://www.zymoresearch.com/pages/zymobiomics-portfolio) mission: increasing the reproducibility and standardization of microbiome analysis.
 
 #### Publication
-Please see [FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters](link/to/preprint/here "Preprint version")
+Please see [FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters](https://www.biorxiv.org/content/10.1101/610394v1 "Preprint version")
 
 ## Quick Start Guide
 
@@ -12,7 +12,9 @@ Please see [FIGARO: An efficient and objective tool for optimizing microbiome rR
 git clone https://github.com/Zymo-Research/figaro.git
 cd figaro
 docker build -t figaro .
-docker container run --rm -e AMPLICONLENGTH=[amplicon length] -e FORWARDPRIMERLENGTH=[forward primer length] -e REVERSEPRIMERLENGTH=[reverse primer length] -v /path/to/fastqs:/data/input -v /path/to/output:/data/output figaro
+docker container run --rm -e AMPLICONLENGTH=[amplicon length] -e FORWARDPRIMERLENGTH=[forward primer length] \
+    -e REVERSEPRIMERLENGTH=[reverse primer length] -v /path/to/fastqs:/data/input \
+    -v /path/to/output:/data/output figaro
 ```
 
 #### Command line
@@ -20,7 +22,8 @@ docker container run --rm -e AMPLICONLENGTH=[amplicon length] -e FORWARDPRIMERLE
 git clone https://github.com/Zymo-Research/figaro.git
 cd figaro
 pip3 install -r requirements.txt
-python3 figaro.py -i /path/to/fastq/directory -o /path/to/output/files -a [amplicon length] -f [forward primer length] -r [reverse primer length]
+python3 figaro.py -i /path/to/fastq/directory -o /path/to/output/files -a [amplicon length] \
+    -f [forward primer length] -r [reverse primer length]
 ```
 
 ## Getting Started
