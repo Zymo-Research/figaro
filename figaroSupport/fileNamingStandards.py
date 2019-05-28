@@ -49,7 +49,10 @@ class ZymoServicesNamingStandard(NamingStandard):
 
     def getSampleInfo(self, fileName:str):
         baseName = fileName.split(".")[0]
-        group, sample, direction = baseName.split("_")
+        try:
+            group, sample, direction = baseName.split("_")
+        except ValueError:
+            raise ValueError("%s does not appear to be a valid Zymo Services file name. Please check file naming convention argument." %fileName)
         direction = int(direction.replace("R",""))
         return group, sample, direction
 
