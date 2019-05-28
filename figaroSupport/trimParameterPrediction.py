@@ -4,6 +4,7 @@ from . import fileNamingStandards
 from . import fastqHandler
 from . import fastqAnalysis
 from . import expectedErrorCurve
+import typing
 import numpy
 
 
@@ -61,8 +62,8 @@ def calculateReverseExpectedErrorFromReadLength(readLength:int):
     return roundedValue + 1
 
 
-def getFastqList(path:str):
-    return fastqHandler.findSamplesInFolder(path)
+def getFastqList(path:str, namingStandard:typing.Type[fileNamingStandards.NamingStandard]):
+    return fastqHandler.findSamplesInFolder(path, namingStandard)
 
 
 def calculateLowestTrimBaseForPairedReads(forwardLength:int, reverseLength:int, minimumCombinedLength:int):
@@ -421,13 +422,14 @@ def performAnalysis(inputDirectory:str, minimumCombinedReadLength:int, subsample
     return resultTable, forwardCurve, reverseCurve
 
 
-def performAnalysisLite(inputDirectory:str, minimumCombinedReadLength:int, subsample:int=0, percentile:int=83, fastqList:list = None, makeExpectedErrorPlots:bool = True, forwardPrimerLength:int=0, reversePrimerLength:int=0):
+def performAnalysisLite(inputDirectory:str, minimumCombinedReadLength:int, subsample:int=0, percentile:int=83, fastqList:list = None, makeExpectedErrorPlots:bool = True, forwardPrimerLength:int=0, reversePrimerLength:int=0, namingStandardAlias:str = "illumina"):
     from . import expectedErrorCurve
+    namingStandard = fileNamingStandards.loadNamingStandard(namingStandardAlias)
     if not inputDirectory:
         if not fastqList:
             raise ValueError("No input directory and no fastq list were given.")
     if not fastqList:
-        fastqList = getFastqList(inputDirectory)
+        fastqList = getFastqList(inputDirectory, namingStandard)
         if not fastqList:
             raise ValueError("No fastq files found in input directory")
     sampleOrder = getSampleOrder(fastqList)

@@ -1,4 +1,8 @@
 expectedEndings = [".fastq", ".fq", ".fastq.gz", ".fq.gz"]
+aliasList = {"zymo": "zymo",
+             "zymoservicesnamingstandard": "zymo",
+             "zymoservices": "zymo",
+             "illumina": "illumina"}
 
 class NamingStandard(object):
 
@@ -45,7 +49,10 @@ class ZymoServicesNamingStandard(NamingStandard):
 
     def getSampleInfo(self, fileName:str):
         baseName = fileName.split(".")[0]
-        group, sample, direction = baseName.split("_")
+        try:
+            group, sample, direction = baseName.split("_")
+        except ValueError:
+            raise ValueError("%s does not appear to be a valid Zymo Services file name. Please check file naming convention argument." %fileName)
         direction = int(direction.replace("R",""))
         return group, sample, direction
 
@@ -55,9 +62,9 @@ class IlluminaStandard(NamingStandard):
     def getSampleInfo(self, fileName:str):
         baseName = fileName.split(".")[0]
         baseSplit = baseName.split("_")
-        group = baseSplit[0]
-        sample = baseSplit[1]
-        direction = int(baseSplit[2].replace("R",""))
+        group = "_".join(baseSplit[:-4])
+        sample = int(baseSplit[-4].replace("S",""))
+        direction = int(baseSplit[-2].replace("R",""))
         return group, sample, direction
 
 
@@ -73,3 +80,12 @@ class ManualNamingStandard(NamingStandard):
         if direction not in [1, 2]:
             raise ValueError("Read direction must be either 1 or 2. %s was given" %direction)
         self.sampleID = (self.group, self.sampleNumber)
+
+
+def loadNamingStandard(name:str):
+    aliasObjectKey = {"zymo" : ZymoServicesNamingStandard,
+                      "illumina" : IlluminaStandard}
+    nameLower = name.lower()
+    if not nameLower in aliasList:
+        raise ValueError("%s is not a valid naming standard identifier" %name)
+    return aliasObjectKey[aliasList[nameLower]]

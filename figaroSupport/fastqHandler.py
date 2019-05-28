@@ -530,7 +530,7 @@ def findSamplesInFolder(directory:str, namingStandard:typing.Type[fileNamingStan
     return fastqFileInfoList
 
 
-def getSamplePairTableFromFolder(directory:str, namingStandard:typing.Type[fileNamingStandards.NamingStandard] = fileNamingStandards.IlluminaStandard):
+def getSamplePairTableFromFolder(directory:str, namingStandard:typing.Type[fileNamingStandards.NamingStandard]):
     def hasMate(fastq:fileNamingStandards.NamingStandard, potentialMates:list):
         for potentialMate in potentialMates:
             if fastq.sameSample(potentialMate):
