@@ -16,7 +16,10 @@ def getApplicationParameters():
     parameters.addParameter("minimumOverlap", int, default=default.minOverlap, lowerBound=5, upperBound=30)
     parameters.addParameter("subsample", int, default=default.subsample, lowerBound=-1)
     parameters.addParameter("percentile", int, default = default.percentile, lowerBound=1, upperBound=100)
+    parameters.addParameter("fileNamingStandard", str, default="illumina", externalValidation=True)
     parameters.checkCreatedFileStructures()
+    if not parameters.fileNamingStandard.value.lower() in figaroSupport.fileNamingStandards.aliasList.keys():
+        raise ValueError("%s is not a valid naming standard alias" %parameters.fileNamingStandard.value)
     combinedReadLengths = parameters.ampliconLength.value + parameters.minimumOverlap.value
     parameters.sideLoadParameter("minimumCombinedReadLength", combinedReadLengths)
     for character in parameters.outputFileName.value:
@@ -43,10 +46,14 @@ def getApplicationParametersFromCommandLine():
     parser.add_argument("-m", "--minimumOverlap", help = "Minimum overlap between the paired-end reads", default=default.minOverlap, type=int)
     parser.add_argument("-s", "--subsample", help = "Subsampling level (will analyze approximately 1/x reads", default=default.subsample, type=int)
     parser.add_argument("-p", "--percentile", help = "Percentile to use for expected error model", default=default.percentile, type=int)
+    parser.add_argument("-F", "--fileNamingStandard", help = "File naming standard to use", default = "illumina")
     args = parser.parse_args()
     # validate args
     outputFileName = args.outputFileName
     ampliconLength = args.ampliconLength
+    if not args.fileNamingStandard.lower() in figaroSupport.fileNamingStandards.aliasList.keys():
+        raise ValueError("%s is not a valid naming standard alias" %args.fileNamingStandard)
+    fileNamingStandard = args.fileNamingStandard
     if not ampliconLength > 0:
         raise ValueError("Amplicon length must be a positive integer. %s was given" %ampliconLength)
     forwardPrimerLength = args.forwardPrimerLength
@@ -85,6 +92,7 @@ def getApplicationParametersFromCommandLine():
     parameters.sideLoadParameter("subsample", subsample)
     parameters.sideLoadParameter("percentile", percentile)
     parameters.sideLoadParameter("minimumCombinedReadLength", combinedReadLengths)
+    parameters.sideLoadParameter("fileNamingStandard", fileNamingStandard)
     return parameters
 
 
@@ -171,7 +179,8 @@ if __name__ == "__main__":
     setLogging()
     parameters = getApplicationParameters()
     logger.debug("Starting analysis")
-    resultTable, forwardCurve, reverseCurve = figaroSupport.trimParameterPrediction.performAnalysisLite(parameters.inputDirectory.value, parameters.minimumCombinedReadLength.value, subsample =  parameters.subsample.value, percentile = parameters.percentile.value, forwardPrimerLength=parameters.forwardPrimerLength.value, reversePrimerLength=parameters.reversePrimerLength.value)
+    fileNamingStandard = parameters.fileNamingStandard.value
+    resultTable, forwardCurve, reverseCurve = figaroSupport.trimParameterPrediction.performAnalysisLite(parameters.inputDirectory.value, parameters.minimumCombinedReadLength.value, subsample =  parameters.subsample.value, percentile = parameters.percentile.value, forwardPrimerLength=parameters.forwardPrimerLength.value, reversePrimerLength=parameters.reversePrimerLength.value, namingStandardAlias=fileNamingStandard)
     for result in resultTable:
         print(result)
     resultTableFileName = os.path.join(parameters.outputDirectory.value, parameters.outputFileName.value)

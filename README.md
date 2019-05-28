@@ -110,6 +110,7 @@ OUTPUTDIRECTORY | string | /data/output | Directory **inside** the container for
 MINIMUMOVERLAP | integer | 20 | How much you want your paired end sequences to overlap in the middle for merging
 SUBSAMPLE | integer | *See description* | What fraction of reads to analyze (1/x) from the FASTQ files. Default value will call a function that sets this based upon the size of the fastq files for a sliding scale.
 PERCENTILE | integer | 83 | The percentile to target for read filtering.  The default value of 83 will remove reads that are about 1 standard deviation worse than the average read for that direction in that position. You can generally expect a few percentage points below your percentile value of reads to pass the filtering.
+FILENAMINGSTANDARD | string | illumina | Naming convention for files. Currently supporting Illumina and Zymo Services (zymo). Others can be added as requested.
 
 #### Command line version
 
@@ -132,6 +133,7 @@ The user can set several parameters using environment variables passed into the 
 --minimumOverlap | -m | integer | 20 | How much you want your paired end sequences to overlap in the middle for merging
 --subsample | -s | integer | *See description* | What fraction of reads to analyze (1/x) from the FASTQ files. Default value will call a function that sets this based upon the size of the fastq files for a sliding scale.
 --percentile | -p | integer | 83 | The percentile to target for read filtering.  The default value of 83 will remove reads that are about 1 standard deviation worse than the average read for that direction in that position. You can generally expect a few percentage points below your percentile value of reads to pass the filtering.
+--fileNamingStandard | -F | string | illumina | Naming convention for files. Currently supporting Illumina and Zymo Services (zymo). Others can be added as requested.
 
 ## FIGARO output
 Trimming parameter candidates will have the following information:
