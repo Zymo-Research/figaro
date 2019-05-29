@@ -26,7 +26,7 @@ def getApplicationParameters():
         if character not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_.-":
             raise ValueError("Unusual character detected for output file name.  Contains %s" %character)
     if parameters.subsample.value == -1:
-        totalFileSize = figaroSupport.fastqAnalysis.getEstimatedFastqSizeSumFromDirectory(parameters.inputDirectory.value)
+        totalFileSize = figaroSupport.fastqAnalysis.getEstimatedFastqSizeSumFromDirectory(parameters.inputDirectory.value, parameters.fileNamingStandard.value)
         fastqGigabytes = totalFileSize / 1000000000
         parameters.subsample.value = round(fastqGigabytes * 10)
     return parameters
@@ -73,7 +73,7 @@ def getApplicationParametersFromCommandLine():
         raise ValueError("Minimum overlap must be a positive integer. %s was given." %minimumOverlap)
     subsample = args.subsample
     if subsample < 0:
-        totalFileSize = figaroSupport.fastqAnalysis.getEstimatedFastqSizeSumFromDirectory(inputDirectory)
+        totalFileSize = figaroSupport.fastqAnalysis.getEstimatedFastqSizeSumFromDirectory(inputDirectory, fileNamingStandard)
         fastqGigabytes = totalFileSize / 1000000000
         subsample = round(fastqGigabytes * 10)
     percentile = args.percentile
