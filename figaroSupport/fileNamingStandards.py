@@ -60,12 +60,15 @@ class ZymoServicesNamingStandard(NamingStandard):
 class IlluminaStandard(NamingStandard):
 
     def getSampleInfo(self, fileName:str):
-        baseName = fileName.split(".")[0]
-        baseSplit = baseName.split("_")
-        group = "_".join(baseSplit[:-4])
-        sample = int(baseSplit[-4].replace("S",""))
-        direction = int(baseSplit[-2].replace("R",""))
-        return group, sample, direction
+        try:
+            baseName = fileName.split(".")[0]
+            baseSplit = baseName.split("_")
+            group = "_".join(baseSplit[:-4])
+            sample = int(baseSplit[-4].replace("S",""))
+            direction = int(baseSplit[-2].replace("R",""))
+            return group, sample, direction
+        except (ValueError, IndexError):
+            raise ValueError("%s does not appear to be a valid Illumina file name. Please check file naming convention argument." % fileName)
 
 
 class ManualNamingStandard(NamingStandard):

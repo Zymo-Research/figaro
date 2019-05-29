@@ -100,10 +100,12 @@ def getEstimatedFastqFileSizeSumFromList(fastqList:list):
         sum += fileSize
     return sum
 
-def getEstimatedFastqSizeSumFromDirectory(path:str):
+def getEstimatedFastqSizeSumFromDirectory(path:str, fileNamingStandardAlias:str):
     import os
+    from . import fileNamingStandards
     from . import fastqHandler
+    fileNamingStandard = fileNamingStandards.loadNamingStandard(fileNamingStandardAlias)
     if not os.path.isdir(path):
         raise NotADirectoryError("Unable to find a directory at %s" %path)
-    fastqList = fastqHandler.findSamplesInFolder(path)
+    fastqList = fastqHandler.findSamplesInFolder(path, fileNamingStandard)
     return getEstimatedFastqFileSizeSumFromList(fastqList)
