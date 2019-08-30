@@ -138,6 +138,31 @@ The user can set several parameters using environment variables passed into the 
 --percentile | -p | integer | 83 | The percentile to target for read filtering.  The default value of 83 will remove reads that are about 1 standard deviation worse than the average read for that direction in that position. You can generally expect a few percentage points below your percentile value of reads to pass the filtering.
 --fileNamingStandard | -F | string | illumina | Naming convention for files. Currently supporting Illumina and Zymo Services (zymo). Others can be added as requested.
 
+#### As Python package
+
+FIGARO will analyze an entire directory of FASTQ files on the system. Run the following command from FIGARO's directory:
+
+```
+
+import figaro
+resultTable, forwardCurve, reverseCurve = figaro.figaro.runAnalysis(sequenceFolder, minCombinedReadLength, forwardPrimerLength, reversePrimerLength, fileNamingStandard, trimParameterDownsample, trimParameterPercentile)
+```
+
+|Parameter        | Type           | Default  | Description |
+|:---------------:|:--------------:|:--------:|-------------|
+sequenceFolder| string | **REQUIRED** | The folder containing the sequences to analyze. User is required to set this.
+minimumCombinedReadLength| integer | **REQUIRED** | The length of the amplified sequence target plus overlap **not including primers**. User is required to set this.
+forwardPrimerLength | integer | **REQUIRED** | The length of the forward primer. User is required to set this.
+reversePrimerLength | integer | **REQUIRED** | The length of the reverse primer. User is required to set this.
+fileNamingStandard | string | illumina | Naming convention for files. Currently supporting Illumina and Zymo Services (zymo). Others can be added as requested.--outputFileName | -n | string | trimParameters.json | The desired name of the JSON list of trim parameters and their scores
+subsample | integer | *See description* | What fraction of reads to analyze (1/x) from the FASTQ files. Default value will call a function that sets this based upon the size of the fastq files for a sliding scale.
+percentile | integer | 83 | The percentile to target for read filtering.  The default value of 83 will remove reads that are about 1 standard deviation worse than the average read for that direction in that position. You can generally expect a few percentage points below your percentile value of reads to pass the filtering.
+
+Output from this will be three values in this order: a list of results, ranked by score, an exponential curve object describing the error model for the forward reads, and the same kind of object describing the error model for the reverse reads.
+
+
+
+
 ## FIGARO output
 Trimming parameter candidates will have the following information:
 - Forward trim position
