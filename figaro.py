@@ -1,5 +1,5 @@
 import logging
-import figaroSupport
+from . import figaroSupport
 
 
 def getApplicationParameters():
@@ -165,6 +165,18 @@ def saveResultOutput(outputDirectory:str, outputResultTableFileName:str, resultT
         outputReverseCurveFile.write(base64.b64decode(reverseCurve.curvePNG))
         outputReverseCurveFile.close()
     return outputResultTablePath, outputForwardCurvePath, outputReverseCurvePath
+
+
+def runAnalysis(inputDirectory:str, minimumCombinedReadLength:int, forwardPrimerLength:int, reversePrimerLength:int, fileNamingStandard:str="illumina", subsample:int = -1, percentile:int=83):
+    import os
+    if not os.path.isdir(inputDirectory):
+        raise NotADirectoryError("Unable to find directory at %s" %inputDirectory)
+    if subsample == -1:
+        totalFileSize = figaroSupport.fastqAnalysis.getEstimatedFastqSizeSumFromDirectory(inputDirectory, fileNamingStandard)
+        fastqGigabytes = totalFileSize / 1000000000
+        subsample = round(fastqGigabytes * 10)
+    resultTable, forwardCurve, reverseCurve = figaroSupport.trimParameterPrediction.performAnalysisLite(inputDirectory, minimumCombinedReadLength, subsample=subsample, percentile=percentile, forwardPrimerLength=forwardPrimerLength, reversePrimerLength=reversePrimerLength, namingStandardAlias=fileNamingStandard)
+    return resultTable, forwardCurve, reverseCurve
 
 
 if __name__ == "__main__":
