@@ -457,7 +457,10 @@ def estimateReadLength(path:str, samplesize:int=100, getVariance = False):
     meanReadLength = sum(lengths)/len(lengths)
     if getVariance:
         import statistics
-        lengthVariance = statistics.variance(lengths)
+        if len(lengths) > 1:
+            lengthVariance = statistics.variance(lengths)
+        else:
+            lengthVariance = 0
         return round(meanReadLength), lengthVariance
     return round(meanReadLength)
 
