@@ -145,7 +145,7 @@ FIGARO will analyze an entire directory of FASTQ files on the system. Run the fo
 ```
 
 from figaro import figaro
-resultTable, forwardCurve, reverseCurve = figaro.runAnalysis(sequenceFolder, minCombinedReadLength, forwardPrimerLength, reversePrimerLength, fileNamingStandard, trimParameterDownsample, trimParameterPercentile)
+resultTable, forwardCurve, reverseCurve = figaro.runAnalysis(sequenceFolder, ampliconLength, forwardPrimerLength, reversePrimerLength, minimumOverlap, fileNamingStandard, trimParameterDownsample, trimParameterPercentile)
 ```
 
 |Parameter        | Type           | Default  | Description |
@@ -154,6 +154,7 @@ sequenceFolder| string | **REQUIRED** | The folder containing the sequences to a
 minimumCombinedReadLength| integer | **REQUIRED** | The length of the amplified sequence target plus overlap **not including primers**. User is required to set this.
 forwardPrimerLength | integer | **REQUIRED** | The length of the forward primer. User is required to set this.
 reversePrimerLength | integer | **REQUIRED** | The length of the reverse primer. User is required to set this.
+minimumOverlap | integer | 20 | The minimum length of overlap desired for read merging
 fileNamingStandard | string | illumina | Naming convention for files. Currently supporting Illumina and Zymo Services (zymo). Others can be added as requested.--outputFileName | -n | string | trimParameters.json | The desired name of the JSON list of trim parameters and their scores
 subsample | integer | *See description* | What fraction of reads to analyze (1/x) from the FASTQ files. Default value will call a function that sets this based upon the size of the fastq files for a sliding scale.
 percentile | integer | 83 | The percentile to target for read filtering.  The default value of 83 will remove reads that are about 1 standard deviation worse than the average read for that direction in that position. You can generally expect a few percentage points below your percentile value of reads to pass the filtering.

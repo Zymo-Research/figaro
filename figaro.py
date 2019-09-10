@@ -185,7 +185,7 @@ def saveResultOutput(outputDirectory:str, outputResultTableFileName:str, resultT
     return outputResultTablePath, outputForwardCurvePath, outputReverseCurvePath
 
 
-def runAnalysis(inputDirectory:str, minimumCombinedReadLength:int, forwardPrimerLength:int, reversePrimerLength:int, fileNamingStandard:str="illumina", subsample:int = -1, percentile:int=83):
+def runAnalysis(inputDirectory:str, ampliconLength:int, forwardPrimerLength:int, reversePrimerLength:int, minimumOverlap:int=20, fileNamingStandard:str="illumina", subsample:int = -1, percentile:int=83):
     import os
     if not os.path.isdir(inputDirectory):
         raise NotADirectoryError("Unable to find directory at %s" %inputDirectory)
@@ -193,7 +193,7 @@ def runAnalysis(inputDirectory:str, minimumCombinedReadLength:int, forwardPrimer
         totalFileSize = figaroSupport.fastqAnalysis.getEstimatedFastqSizeSumFromDirectory(inputDirectory, fileNamingStandard)
         fastqGigabytes = totalFileSize / 1000000000
         subsample = round(fastqGigabytes * 10)
-    resultTable, forwardCurve, reverseCurve = figaroSupport.trimParameterPrediction.performAnalysisLite(inputDirectory, minimumCombinedReadLength, subsample=subsample, percentile=percentile, forwardPrimerLength=forwardPrimerLength, reversePrimerLength=reversePrimerLength, namingStandardAlias=fileNamingStandard)
+    resultTable, forwardCurve, reverseCurve = figaroSupport.trimParameterPrediction.performAnalysisLite(inputDirectory, ampliconLength + minimumOverlap, subsample=subsample, percentile=percentile, forwardPrimerLength=forwardPrimerLength, reversePrimerLength=reversePrimerLength, namingStandardAlias=fileNamingStandard)
     return resultTable, forwardCurve, reverseCurve
 
 
