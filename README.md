@@ -144,8 +144,8 @@ FIGARO will analyze an entire directory of FASTQ files on the system. Run the fo
 
 ```
 
-import figaro
-resultTable, forwardCurve, reverseCurve = figaro.figaro.runAnalysis(sequenceFolder, minCombinedReadLength, forwardPrimerLength, reversePrimerLength, fileNamingStandard, trimParameterDownsample, trimParameterPercentile)
+from figaro import figaro
+resultTable, forwardCurve, reverseCurve = figaro.runAnalysis(sequenceFolder, minCombinedReadLength, forwardPrimerLength, reversePrimerLength, fileNamingStandard, trimParameterDownsample, trimParameterPercentile)
 ```
 
 |Parameter        | Type           | Default  | Description |

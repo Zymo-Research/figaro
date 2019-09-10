@@ -1,5 +1,8 @@
 import logging
-from . import figaroSupport
+try:  #This block is here to handle importing issues that happen when running this as a python package vs. running in a Docker or directly from the commandline.
+    import figaroSupport
+except ImportError:
+    from . import figaroSupport
 
 
 def getApplicationParameters():
@@ -32,10 +35,9 @@ def getApplicationParameters():
     return parameters
 
 
-def getApplicationParametersFromCommandLine():
+def parseArgs():
     import argparse
     import os
-    # parse args
     parser = argparse.ArgumentParser()
     parser.add_argument("-o", "--outputDirectory", help = "Directory for outputs", default = os.getcwd())
     parser.add_argument("-a", "--ampliconLength", help = "Length of amplicon (not including primers)", required=True, type=int)
@@ -47,8 +49,13 @@ def getApplicationParametersFromCommandLine():
     parser.add_argument("-s", "--subsample", help = "Subsampling level (will analyze approximately 1/x reads", default=default.subsample, type=int)
     parser.add_argument("-p", "--percentile", help = "Percentile to use for expected error model", default=default.percentile, type=int)
     parser.add_argument("-F", "--fileNamingStandard", help = "File naming standard to use", default = "illumina")
-    args = parser.parse_args()
-    # validate args
+    parser.add_argument("-l", "--logFile", help = "Log file path", default = None)
+    return parser.parse_args()
+
+
+def getApplicationParametersFromCommandLine():
+    import os
+    args = parseArgs()
     outputFileName = args.outputFileName
     ampliconLength = args.ampliconLength
     if not args.fileNamingStandard.lower() in figaroSupport.fileNamingStandards.aliasList.keys():
@@ -97,8 +104,19 @@ def getApplicationParametersFromCommandLine():
 
 
 def getLoggingParameters():
+    import sys
+    import os
     loggingParameters = figaroSupport.environmentParameterParser.EnvParameters()
-    loggingParameters.addParameter("logFile", str, default=default.logFile, createdFile=True)
+    if len(sys.argv) > 1:
+        args = parseArgs()
+        if args.logFile:
+            loggingParameters.sideLoadParameter("logFile", args.logFile)
+        else:
+            import datetime
+            timestamp = str(datetime.datetime.now().timestamp()).replace(".", "")
+            loggingParameters.sideLoadParameter("logFile", os.path.join(args.outputDirectory, "figaro.%s.log" %timestamp))
+    else:
+        loggingParameters.addParameter("logFile", str, default=default.logFile, createdFile=True)
     loggingParameters.addParameter("logLevel", str, default=default.loggingLevel, logLevel=True)
     loggingParameters.addParameter("streamOff", bool, default=False)
     loggingParameters.addParameter("streamLoglevel", str, default=default.loggingLevel, logLevel=True)
