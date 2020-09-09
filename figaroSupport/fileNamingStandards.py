@@ -2,7 +2,8 @@ expectedEndings = [".fastq", ".fq", ".fastq.gz", ".fq.gz"]
 aliasList = {"zymo": "zymo",
              "zymoservicesnamingstandard": "zymo",
              "zymoservices": "zymo",
-             "illumina": "illumina"}
+             "illumina": "illumina",
+             "keriksson": "keriksson"}
 
 class NamingStandard(object):
 
@@ -69,6 +70,21 @@ class IlluminaStandard(NamingStandard):
             return group, sample, direction
         except (ValueError, IndexError):
             raise ValueError("%s does not appear to be a valid Illumina file name. Please check file naming convention argument." % fileName)
+
+
+class KErickssonStandard(NamingStandard):
+
+    def getSampleInfo(self, fileName:str):
+        group, sampleAndDirection = fileName.split(".")[:2]
+        try:
+            sample, direction = sampleAndDirection.split("_")
+            direction = direction.replace("R", "")
+            direction = direction.replace("r", "")
+            direction = int(direction)
+        except ValueError:
+            raise ValueError("%s does not appear to be a valid file for this standard. Please check file naming convention argument." %fileName)
+
+        return group, sample, direction
 
 
 class ManualNamingStandard(NamingStandard):
