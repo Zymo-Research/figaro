@@ -103,7 +103,8 @@ class ManualNamingStandard(NamingStandard):
 
 def loadNamingStandard(name:str):
     aliasObjectKey = {"zymo" : ZymoServicesNamingStandard,
-                      "illumina" : IlluminaStandard}
+                      "illumina" : IlluminaStandard,
+                      "keriksson": KErickssonStandard}
     nameLower = name.lower()
     if not nameLower in aliasList:
         raise ValueError("%s is not a valid naming standard identifier" %name)
