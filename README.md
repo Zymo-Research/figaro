@@ -13,6 +13,9 @@
 
 *Features will be added to sub-branches of this branch and pulled in to this branch as they are completed and tested. I will try to keep documentation up-to-date on this branch, but it may not always be as such on sub-branches that are under active development.*
 
+
+**Variable length reads:** The goal here is to be able to handle reads of varying length with the ability to measure the amount of variance in read length and limit the allowed amount (since running this on reads that have been quality trimmed is still a terrible idea for model-building)
+
 -----
 
 
