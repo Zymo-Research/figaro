@@ -2,6 +2,20 @@
 
 *The beauty of science is to make things simple*.  It in this spirit that we developed and present to you FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters.  FIGARO will quickly analyze error rates in a directory of FASTQ files to determine optimal trimming parameters for high-resolution targeted microbiome sequencing pipelines, such as those utilizing [DADA2](https://github.com/benjjneb/dada2 "Github") and [Deblur](https://github.com/biocore/deblur "Github").  The mission of this application is identical to the [ZymoBIOMICS](https://www.zymoresearch.com/pages/zymobiomics-portfolio) mission: increasing the reproducibility and standardization of microbiome analysis.
 
+-----
+##Version 2 development. 
+###This version has 3 major goals:
+
+* Ability to take in variable length reads
+* Ability to take in a list of files for paired-end analysis
+* Moving towards being able to incorporate Figaro 2 and beyond into a QIIME2 wrapper
+
+
+*Features will be added to sub-branches of this branch and pulled in to this branch as they are completed and tested. I will try to keep documentation up-to-date on this branch, but it may not always be as such on sub-branches that are under active development.*
+
+-----
+
+
 #### Publication
 Please see [FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters](https://www.biorxiv.org/content/10.1101/610394v1 "Preprint version")
 
