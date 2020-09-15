@@ -445,7 +445,7 @@ def validFastqPair(pe1Path:str, pe2Path:str):
     return readCount
 
 
-def estimateReadLength(path:str, samplesize:int=100, getVariance = False):
+def estimateReadLength(path:str, samplesize:int=100, getVariance:bool = False, getRange:bool = False):
     lengths = []
     fastq = FastqFile(path)
     read = fastq.getNextRead()
@@ -455,14 +455,21 @@ def estimateReadLength(path:str, samplesize:int=100, getVariance = False):
             break
         read = fastq.getNextRead()
     meanReadLength = sum(lengths)/len(lengths)
+    if not getVariance and not getRange:
+        return round(meanReadLength)
+    returnList = [round(meanReadLength)]
+    if getRange:
+        returnList.append(min(lengths))
+        returnList.append(max(lengths))
     if getVariance:
         import statistics
         if len(lengths) > 1:
             lengthVariance = statistics.variance(lengths)
         else:
             lengthVariance = 0
-        return round(meanReadLength), lengthVariance
-    return round(meanReadLength)
+        returnList.append(lengthVariance)
+    return tuple(returnList)
+
 
 
 def getLongestReadInFile(path:str):

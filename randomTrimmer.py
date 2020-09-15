@@ -16,8 +16,9 @@ def randomTrimFile(inputFilePath:str, outputFilePath:str, maxTrim:int=10):
     outputFile = open(outputFilePath, 'w')
     for read in fastq:
         trimLength = random.randint(0, maxTrim - 1)
-        read.sequence = read.sequence[:-trimLength]
-        read.quality = read.quality[:-trimLength]
+        if trimLength:
+            read.sequence = read.sequence[:-trimLength]
+            read.quality = read.quality[:-trimLength]
         print(read, file=outputFile)
     outputFile.close()
     fastq.close()

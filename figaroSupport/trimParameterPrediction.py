@@ -6,6 +6,7 @@ from . import fastqAnalysis
 from . import expectedErrorCurve
 import typing
 import numpy
+import statistics
 
 
 class TrimParameterSet(object):
@@ -47,6 +48,7 @@ def calculateMaxExpectedErrorFromReadLength(readLength:int):
     for i in range(1, dividedLength + 1):
         maxExpectedError += i
     return maxExpectedError + 1
+
 
 def calculateForwardExpectedErrorFromReadLength(readLength:int):
     import math
@@ -288,40 +290,40 @@ def padMaxExpectedError(rawValue:float):
     return roundedUpValue + 1
 
 
-def runTrimParameterTest(forwardExpectedErrorMatrix:numpy.ndarray, reverseExpectedErrorMatrix:numpy.ndarray, forwardFirstNBaseArray:numpy.ndarray, reverseFirstNBaseArray:numpy.ndarray, forwardQ2Array:numpy.ndarray, reverseQ2Array:numpy.ndarray, trimPositions:tuple, minimumTrimPositions:tuple = (0, 0), forwardCurve:expectedErrorCurve.ExponentialFit=None, reverseCurve:expectedErrorCurve.ExponentialFit=None, forwardPrimerLength:int=0, reversePrimerLength:int=0):
-    import operator
-    forwardMinimumTrimPosition, reverseMinimumTrimPosition = minimumTrimPositions
-    results = []
-    for forwardTrimPosition, reverseTrimPosition in trimPositions:
-        if not forwardCurve:
-            forwardMaxExpectedError = calculateForwardExpectedErrorFromReadLength(forwardTrimPosition)
-        else:
-            forwardMaxExpectedError = padMaxExpectedError(forwardCurve.calculateValue(forwardTrimPosition))
-        if not reverseCurve:
-            reverseMaxExpectedError = calculateReverseExpectedErrorFromReadLength(reverseTrimPosition)
-        else:
-            reverseMaxExpectedError = padMaxExpectedError(reverseCurve.calculateValue(reverseTrimPosition))
-        forwardExpectedErrors = forwardExpectedErrorMatrix[forwardTrimPosition - forwardMinimumTrimPosition]
-        reverseExpectedErrors = reverseExpectedErrorMatrix[reverseTrimPosition - reverseMinimumTrimPosition]
-        totalReads = 0
-        keptReads = 0
-        rejectedReads = 0
-        for forwardExpectedErrorValue, reverseExpectedErrorValue, forwardFirstNBasePosition, reverseFirstNBasePosition, forwardQ2Position, reverseQ2Position in zip(forwardExpectedErrors, reverseExpectedErrors, forwardFirstNBaseArray, reverseFirstNBaseArray, forwardQ2Array, reverseQ2Array):
-            totalReads += 1
-            if forwardExpectedErrorValue >= forwardMaxExpectedError or reverseExpectedErrorValue >= reverseMaxExpectedError: #Using this because I lose fractional values to save on memory. In theory, this would probably disagree with dada2's decision if the real value is exactly an integer with no fractional portion.  This is unlikely to happen often enough to be an issue.
-                rejectedReads += 1
-                continue
-            elif forwardTrimPosition >= forwardFirstNBasePosition or reverseTrimPosition >= reverseFirstNBasePosition:
-                rejectedReads += 1
-                continue
-            elif forwardTrimPosition >= forwardQ2Position or reverseTrimPosition >= reverseQ2Position:
-                rejectedReads += 1
-                continue
-            else:
-                keptReads += 1
-        results.append(TrimParameterSet(forwardTrimPosition + 1 + forwardPrimerLength, reverseTrimPosition + 1 + reversePrimerLength, forwardMaxExpectedError, reverseMaxExpectedError, keptReads/totalReads)) #doing +1 to adjust for zero indexed matrices
-        results.sort(key = operator.attrgetter("score"), reverse=True)
-    return results
+# def runTrimParameterTest(forwardExpectedErrorMatrix:numpy.ndarray, reverseExpectedErrorMatrix:numpy.ndarray, forwardFirstNBaseArray:numpy.ndarray, reverseFirstNBaseArray:numpy.ndarray, forwardQ2Array:numpy.ndarray, reverseQ2Array:numpy.ndarray, trimPositions:tuple, minimumTrimPositions:tuple = (0, 0), forwardCurve:expectedErrorCurve.ExponentialFit=None, reverseCurve:expectedErrorCurve.ExponentialFit=None, forwardPrimerLength:int=0, reversePrimerLength:int=0):
+#     import operator
+#     forwardMinimumTrimPosition, reverseMinimumTrimPosition = minimumTrimPositions
+#     results = []
+#     for forwardTrimPosition, reverseTrimPosition in trimPositions:
+#         if not forwardCurve:
+#             forwardMaxExpectedError = calculateForwardExpectedErrorFromReadLength(forwardTrimPosition)
+#         else:
+#             forwardMaxExpectedError = padMaxExpectedError(forwardCurve.calculateValue(forwardTrimPosition))
+#         if not reverseCurve:
+#             reverseMaxExpectedError = calculateReverseExpectedErrorFromReadLength(reverseTrimPosition)
+#         else:
+#             reverseMaxExpectedError = padMaxExpectedError(reverseCurve.calculateValue(reverseTrimPosition))
+#         forwardExpectedErrors = forwardExpectedErrorMatrix[forwardTrimPosition - forwardMinimumTrimPosition]
+#         reverseExpectedErrors = reverseExpectedErrorMatrix[reverseTrimPosition - reverseMinimumTrimPosition]
+#         totalReads = 0
+#         keptReads = 0
+#         rejectedReads = 0
+#         for forwardExpectedErrorValue, reverseExpectedErrorValue, forwardFirstNBasePosition, reverseFirstNBasePosition, forwardQ2Position, reverseQ2Position in zip(forwardExpectedErrors, reverseExpectedErrors, forwardFirstNBaseArray, reverseFirstNBaseArray, forwardQ2Array, reverseQ2Array):
+#             totalReads += 1
+#             if forwardExpectedErrorValue >= forwardMaxExpectedError or reverseExpectedErrorValue >= reverseMaxExpectedError: #Using this because I lose fractional values to save on memory. In theory, this would probably disagree with dada2's decision if the real value is exactly an integer with no fractional portion.  This is unlikely to happen often enough to be an issue.
+#                 rejectedReads += 1
+#                 continue
+#             elif forwardTrimPosition >= forwardFirstNBasePosition or reverseTrimPosition >= reverseFirstNBasePosition:
+#                 rejectedReads += 1
+#                 continue
+#             elif forwardTrimPosition >= forwardQ2Position or reverseTrimPosition >= reverseQ2Position:
+#                 rejectedReads += 1
+#                 continue
+#             else:
+#                 keptReads += 1
+#         results.append(TrimParameterSet(forwardTrimPosition + 1 + forwardPrimerLength, reverseTrimPosition + 1 + reversePrimerLength, forwardMaxExpectedError, reverseMaxExpectedError, keptReads/totalReads)) #doing +1 to adjust for zero indexed matrices
+#         results.sort(key = operator.attrgetter("score"), reverse=True)
+#     return results
 
 
 def runTrimParameterTestLite(forwardExpectedErrorMatrix:numpy.ndarray, reverseExpectedErrorMatrix:numpy.ndarray, trimPositions:tuple, minimumTrimPositions:tuple = (0, 0), forwardCurve:expectedErrorCurve.ExponentialFit=None, reverseCurve:expectedErrorCurve.ExponentialFit=None, forwardPrimerLength:int=0, reversePrimerLength:int=0):
@@ -361,10 +363,17 @@ def getSampleOrder(fastqList:list):
 
 
 def parallelReadLengthChecker(fastq:fileNamingStandards.NamingStandard):
-    return fastq, fastqHandler.estimateReadLength(fastq.filePath, getVariance=True)
+    return fastq, fastqHandler.estimateReadLength(fastq.filePath, getVariance=True, getRange=True)
 
 
 def checkReadLengths(fastqList:list):
+
+    def extractValueList(readData:set, index:int):
+        collection = []
+        for value in readData:
+            collection.append(value[index])
+        return collection
+
     from . import easyMultiprocessing
     read1Data = []
     read2Data = []
@@ -376,50 +385,50 @@ def checkReadLengths(fastqList:list):
             read2Data.append(data)
     read1DataSet = set(read1Data)
     read2DataSet = set(read2Data)
+    read1AverageLength = statistics.mean(extractValueList(read1DataSet, 0))
+    read2AverageLength = statistics.mean(extractValueList(read2DataSet, 0))
+    read1MinLength = min(extractValueList(read1DataSet, 1))
+    read2MinLength = min(extractValueList(read2DataSet, 1))
+    read1MaxLength = max(extractValueList(read1DataSet, 2))
+    read2MaxLength = max(extractValueList(read2DataSet, 2))
+    read1AverageVariance = statistics.mean(extractValueList(read1DataSet, 3))
+    read2AverageVariance = statistics.mean(extractValueList(read2DataSet, 3))
     filesPassCheck = True
     if not len(read1Data) == len(read2Data):
         logger.error("There appears to be a different number of forward and reverse fastq files in the sequence folder. %s forward and %s reverse" %(len(read1Data), len(read2Data)))
         filesPassCheck = False
-    if not len(read1DataSet) == 1:
-        logger.error("Forward read files appear to be of different lengths or of varied lengths. %s" %read1DataSet)
-        filesPassCheck = False
-    if not len(read2DataSet) == 1:
-        logger.error("Reverse read files appear to be of different lengths or of varied lengths. %s" % read2DataSet)
-        filesPassCheck = False
-    read1Length, read1Variance = list(read1DataSet)[0]
-    read2Length, read2Variance = list(read2DataSet)[0]
-    if read1Variance:
-        logger.error("Forward reads appear to not be of consistent length. %s" %read1DataSet)
-        filesPassCheck = False
-    if read2Variance:
-        logger.error("Reverse reads appear to not be of consistent length. %s" %read2DataSet)
-        filesPassCheck = False
+    if read1AverageVariance:
+        logger.warning("Forward reads appear to not be of consistent length. Average: %s  Variance: %s" %(read1AverageLength, read1AverageVariance))
+        #filesPassCheck = False
+    if read2AverageVariance:
+        logger.warning("Reverse reads appear to not be of consistent length. Average: %s  Variance: %s" %(read2AverageLength, read2AverageVariance))
+        #filesPassCheck = False
     if not filesPassCheck:
         raise fastqHandler.FastqValidationError("Unable to validate fastq files enough to perform this operation. Please check log for specific error(s).")
-    return read1Length, read2Length
+    return read1AverageLength, read2AverageLength
 
 
-def performAnalysis(inputDirectory:str, minimumCombinedReadLength:int, subsample:int=0, percentile:int=83, fastqList:list = None, makeExpectedErrorPlots:bool = True, forwardPrimerLength:int=0, reversePrimerLength:int=0):
-    from . import expectedErrorCurve
-    if not inputDirectory:
-        if not fastqList:
-            raise ValueError("No input directory and no fastq list were given.")
-    if not fastqList:
-        fastqList = getFastqList(inputDirectory)
-        if not fastqList:
-            raise ValueError("No fastq files found in input directory")
-    sampleOrder = getSampleOrder(fastqList)
-    forwardReadLength, reverseReadLength = checkReadLengths(fastqList)
-    forwardReadLength = forwardReadLength - forwardPrimerLength
-    reverseReadLength = reverseReadLength - reversePrimerLength
-    forwardCurve, reverseCurve = expectedErrorCurve.calculateExpectedErrorCurvesForFastqList(fastqList, subsample=subsample, percentile=percentile, makePNG=makeExpectedErrorPlots, forwardPrimerLength=forwardPrimerLength, reversePrimerLength=reversePrimerLength)
-    minimumTrimmingPositions = calculateLowestTrimBaseForPairedReads(forwardReadLength, reverseReadLength, minimumCombinedReadLength)
-    trimPositions = makeAllPossibleTrimLocations(forwardReadLength, reverseReadLength, minimumCombinedReadLength)
-    forwardQ2Array, reverseQ2Array = makeCombinedQ2ArraysForBothEnds(fastqList, sampleOrder, subsample, forwardPrimerLength, reversePrimerLength)
-    forwardFirstNBaseArray, reverseFirstNBaseArray = makeCombinedFirstNBaseArraysForBothEnds(fastqList, sampleOrder, subsample, forwardPrimerLength, reversePrimerLength)
-    forwardExpectedErrorMatrix, reverseExpectedErrorMatrix = makeCombinedErrorMatricesForBothEnds(fastqList, sampleOrder, subsample, minimumTrimmingPositions, forwardPrimerLength, reversePrimerLength)
-    resultTable = runTrimParameterTest(forwardExpectedErrorMatrix, reverseExpectedErrorMatrix, forwardFirstNBaseArray, reverseFirstNBaseArray, forwardQ2Array, reverseQ2Array, trimPositions, minimumTrimmingPositions, forwardCurve, reverseCurve, forwardPrimerLength, reversePrimerLength)
-    return resultTable, forwardCurve, reverseCurve
+# def performAnalysis(inputDirectory:str, minimumCombinedReadLength:int, subsample:int=0, percentile:int=83, fastqList:list = None, makeExpectedErrorPlots:bool = True, forwardPrimerLength:int=0, reversePrimerLength:int=0):
+#     from . import expectedErrorCurve
+#     if not inputDirectory:
+#         if not fastqList:
+#             raise ValueError("No input directory and no fastq list were given.")
+#     if not fastqList:
+#         fastqList = getFastqList(inputDirectory)
+#         if not fastqList:
+#             raise ValueError("No fastq files found in input directory")
+#     sampleOrder = getSampleOrder(fastqList)
+#     forwardReadLength, reverseReadLength = checkReadLengths(fastqList)
+#     forwardReadLength = forwardReadLength - forwardPrimerLength
+#     reverseReadLength = reverseReadLength - reversePrimerLength
+#     forwardCurve, reverseCurve = expectedErrorCurve.calculateExpectedErrorCurvesForFastqList(fastqList, subsample=subsample, percentile=percentile, makePNG=makeExpectedErrorPlots, forwardPrimerLength=forwardPrimerLength, reversePrimerLength=reversePrimerLength)
+#     minimumTrimmingPositions = calculateLowestTrimBaseForPairedReads(forwardReadLength, reverseReadLength, minimumCombinedReadLength)
+#     trimPositions = makeAllPossibleTrimLocations(forwardReadLength, reverseReadLength, minimumCombinedReadLength)
+#     forwardQ2Array, reverseQ2Array = makeCombinedQ2ArraysForBothEnds(fastqList, sampleOrder, subsample, forwardPrimerLength, reversePrimerLength)
+#     forwardFirstNBaseArray, reverseFirstNBaseArray = makeCombinedFirstNBaseArraysForBothEnds(fastqList, sampleOrder, subsample, forwardPrimerLength, reversePrimerLength)
+#     forwardExpectedErrorMatrix, reverseExpectedErrorMatrix = makeCombinedErrorMatricesForBothEnds(fastqList, sampleOrder, subsample, minimumTrimmingPositions, forwardPrimerLength, reversePrimerLength)
+#     resultTable = runTrimParameterTest(forwardExpectedErrorMatrix, reverseExpectedErrorMatrix, forwardFirstNBaseArray, reverseFirstNBaseArray, forwardQ2Array, reverseQ2Array, trimPositions, minimumTrimmingPositions, forwardCurve, reverseCurve, forwardPrimerLength, reversePrimerLength)
+#     return resultTable, forwardCurve, reverseCurve
 
 
 def performAnalysisLite(inputDirectory:str, minimumCombinedReadLength:int, subsample:int=0, percentile:int=83, fastqList:list = None, makeExpectedErrorPlots:bool = True, forwardPrimerLength:int=0, reversePrimerLength:int=0, namingStandardAlias:str = "illumina"):
