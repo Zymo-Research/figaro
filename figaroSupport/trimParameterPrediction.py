@@ -233,22 +233,23 @@ def makeCombinedFirstNBaseArraysForBothEnds(fastqList:list, sampleOrder:list, su
 
 class ExpectedErrorMatrixBuilderParallelAgent(object):
 
-    def __init__(self, startPosition:int = 0, subsample:int=0, primerLength:int=0):
+    def __init__(self, startPosition:int = 0, subsample:int=0, primerLength:int=0, shortestExpectedReadLength:int=0):
         self.startPosition = startPosition
         self.subsample = subsample
         self.primerLength = primerLength
+        self.shortestExpectedReadLength = shortestExpectedReadLength
 
     def makeExpectedErrorMatrix(self, fastq: fileNamingStandards.NamingStandard):
         #print("Running %s" %fastq)
         expectedErrorMatrix = fastqAnalysis.buildExpectedErrorMatrix(fastq.filePath, superLean=True,
-            startPosition=self.startPosition, subsample=self.subsample, leftTrim=self.primerLength)
+            startPosition=self.startPosition, subsample=self.subsample, leftTrim=self.primerLength, padOrTrimToLength=self.shortestExpectedReadLength)
         return fastq, expectedErrorMatrix
 
 
-def makeCombinedExpectedErrorMatrixForOneDirection(fastqList:list, sampleOrder:list, subsample:int, startPosition:int = 0, primerLength:int=0):
+def makeCombinedExpectedErrorMatrixForOneDirection(fastqList:list, sampleOrder:list, subsample:int, startPosition:int = 0, primerLength:int=0, shortestExpectedReadLength:int=0):
     import numpy
     from . import easyMultiprocessing
-    parallelBuildAgent = ExpectedErrorMatrixBuilderParallelAgent(startPosition, subsample, primerLength)
+    parallelBuildAgent = ExpectedErrorMatrixBuilderParallelAgent(startPosition, subsample, primerLength, shortestExpectedReadLength)
     expectedErrorMatrices = easyMultiprocessing.parallelProcessRunner(parallelBuildAgent.makeExpectedErrorMatrix, fastqList)
     combinedMatrixStarted = False
     combinedMatrix = None
@@ -273,12 +274,12 @@ def makeCombinedExpectedErrorMatrixForOneDirection(fastqList:list, sampleOrder:l
     return combinedMatrix.transpose() #columns for reads, rows for positions
 
 
-def makeCombinedErrorMatricesForBothEnds(fastqList:list, sampleOrder:list, subsample:int, minimumTrimPositions:tuple = (0,0), forwardPrimerLength:int=0, reversePrimerLength:int=0):
+def makeCombinedErrorMatricesForBothEnds(fastqList:list, sampleOrder:list, subsample:int, minimumTrimPositions:tuple = (0,0), forwardPrimerLength:int=0, reversePrimerLength:int=0, shortestExpectedForwardReadLength:int=0, shortestExpectedReverseReadLength:int=0):
     forwardMinimumTrimPosition, reverseMinimumTrimPosition = minimumTrimPositions
     forwardFastqList = [fastq for fastq in fastqList if fastq.direction == 1]
     reverseFastqList = [fastq for fastq in fastqList if fastq.direction == 2]
-    forwardExpectedErrorMatrix = makeCombinedExpectedErrorMatrixForOneDirection(forwardFastqList, sampleOrder, subsample, forwardMinimumTrimPosition, forwardPrimerLength)
-    reverseExpectedErrorMatrix = makeCombinedExpectedErrorMatrixForOneDirection(reverseFastqList, sampleOrder, subsample, reverseMinimumTrimPosition, reversePrimerLength)
+    forwardExpectedErrorMatrix = makeCombinedExpectedErrorMatrixForOneDirection(forwardFastqList, sampleOrder, subsample, forwardMinimumTrimPosition, forwardPrimerLength, shortestExpectedForwardReadLength)
+    reverseExpectedErrorMatrix = makeCombinedExpectedErrorMatrixForOneDirection(reverseFastqList, sampleOrder, subsample, reverseMinimumTrimPosition, reversePrimerLength, shortestExpectedReverseReadLength)
     #print("Expected Error Matrix Sizes:")
     #print("F: %s" %(forwardExpectedErrorMatrix.size))
     #print("R: %s" %(reverseExpectedErrorMatrix.size))
@@ -405,7 +406,7 @@ def checkReadLengths(fastqList:list):
         #filesPassCheck = False
     if not filesPassCheck:
         raise fastqHandler.FastqValidationError("Unable to validate fastq files enough to perform this operation. Please check log for specific error(s).")
-    return read1AverageLength, read2AverageLength
+    return read1AverageLength, read2AverageLength, read1MinLength, read2MinLength, read1MaxLength, read2MaxLength
 
 
 # def performAnalysis(inputDirectory:str, minimumCombinedReadLength:int, subsample:int=0, percentile:int=83, fastqList:list = None, makeExpectedErrorPlots:bool = True, forwardPrimerLength:int=0, reversePrimerLength:int=0):
@@ -442,12 +443,12 @@ def performAnalysisLite(inputDirectory:str, minimumCombinedReadLength:int, subsa
         if not fastqList:
             raise ValueError("No fastq files found in input directory")
     sampleOrder = getSampleOrder(fastqList)
-    forwardReadLength, reverseReadLength = checkReadLengths(fastqList)
-    forwardReadLength = forwardReadLength - forwardPrimerLength
-    reverseReadLength = reverseReadLength - reversePrimerLength
-    forwardCurve, reverseCurve = expectedErrorCurve.calculateExpectedErrorCurvesForFastqList(fastqList, subsample=subsample, percentile=percentile, makePNG=makeExpectedErrorPlots, forwardPrimerLength=forwardPrimerLength, reversePrimerLength=reversePrimerLength)
-    minimumTrimmingPositions = calculateLowestTrimBaseForPairedReads(forwardReadLength, reverseReadLength, minimumCombinedReadLength)
-    trimPositions = makeAllPossibleTrimLocations(forwardReadLength, reverseReadLength, minimumCombinedReadLength)
-    forwardExpectedErrorMatrix, reverseExpectedErrorMatrix = makeCombinedErrorMatricesForBothEnds(fastqList, sampleOrder, subsample, minimumTrimmingPositions, forwardPrimerLength, reversePrimerLength)
+    forwardReadAverageLength, reverseReadAverageLength, forwardReadMinLength, reverseReadMinLength, forwardReadMaxLength, reverseReadMaxLength = checkReadLengths(fastqList)
+    forwardReadMinLength = forwardReadMinLength - forwardPrimerLength
+    reverseReadMinLength = reverseReadMinLength - reversePrimerLength
+    forwardCurve, reverseCurve = expectedErrorCurve.calculateExpectedErrorCurvesForFastqList(fastqList, subsample=subsample, percentile=percentile, makePNG=makeExpectedErrorPlots, forwardPrimerLength=forwardPrimerLength, reversePrimerLength=reversePrimerLength, forwardReadTrimOrPadLength=forwardReadMinLength, reverseReadTrimOrPadLength=reverseReadMinLength)
+    minimumTrimmingPositions = calculateLowestTrimBaseForPairedReads(forwardReadMinLength, reverseReadMinLength, minimumCombinedReadLength)
+    trimPositions = makeAllPossibleTrimLocations(forwardReadMinLength, reverseReadMinLength, minimumCombinedReadLength)
+    forwardExpectedErrorMatrix, reverseExpectedErrorMatrix = makeCombinedErrorMatricesForBothEnds(fastqList, sampleOrder, subsample, minimumTrimmingPositions, forwardPrimerLength, reversePrimerLength, forwardReadMinLength, reverseReadMinLength)
     resultTable = runTrimParameterTestLite(forwardExpectedErrorMatrix, reverseExpectedErrorMatrix, trimPositions, minimumTrimmingPositions, forwardCurve, reverseCurve, forwardPrimerLength, reversePrimerLength)
     return resultTable, forwardCurve, reverseCurve

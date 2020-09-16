@@ -82,15 +82,16 @@ class ParallelExpectedErrorAverageAgent(object):
 
 class ParallelExpectedErrorPercentileAgent(object):
 
-    def __init__(self, subsample:int=0, percentile:int=83, primerLength:int=0):
+    def __init__(self, subsample:int=0, percentile:int=83, primerLength:int=0, padOrTrimToLength:int=0):
         if subsample == 0:
             subsample = 1
         self.subsample = subsample
         self.percentile = percentile
         self.primerLength = primerLength
+        self.padOrTrimToLength = padOrTrimToLength
 
     def calculateAverageExpectedError(self, fastq:fileNamingStandards.NamingStandard):
-        percentileExpectedError = makeExpectedErrorPercentileArrayForFastq(fastq.filePath, self.subsample, self.percentile, self.primerLength)
+        percentileExpectedError = makeExpectedErrorPercentileArrayForFastq(fastq.filePath, self.subsample, self.percentile, self.primerLength, self.padOrTrimToLength)
         return fastq, percentileExpectedError
 
 
@@ -101,17 +102,17 @@ def makeExpectedErrorAverageArrayForFastq(path:str, subsample:int=0, primerLengt
     return meanArray
 
 
-def makeExpectedErrorPercentileArrayForFastq(path:str, subsample:int=0, percentile:int=83, primerLength:int=0):
-    expectedErrorMatrix = fastqAnalysis.buildExpectedErrorMatrix(path, subsample=subsample, leftTrim=primerLength)
+def makeExpectedErrorPercentileArrayForFastq(path:str, subsample:int=0, percentile:int=83, primerLength:int=0, padOrTrimToLength:int=0):
+    expectedErrorMatrix = fastqAnalysis.buildExpectedErrorMatrix(path, subsample=subsample, leftTrim=primerLength, padOrTrimToLength=padOrTrimToLength)
     percentileList = []
     for positionArray in expectedErrorMatrix.transpose():
         percentileList.append(numpy.percentile(positionArray, percentile))
     return numpy.array(percentileList)
 
 
-def makeExpectedErrorPercentileArrayForFastqList(fastqList:list, subsample:int=0, percentile:int=83, primerLength:int=0):
+def makeExpectedErrorPercentileArrayForFastqList(fastqList:list, subsample:int=0, percentile:int=83, primerLength:int=0, padOrTrimToLength:int=0):
     from . import easyMultiprocessing
-    parallelAgent = ParallelExpectedErrorPercentileAgent(subsample, percentile, primerLength)
+    parallelAgent = ParallelExpectedErrorPercentileAgent(subsample, percentile, primerLength, padOrTrimToLength)
     expectedErrorReturns = easyMultiprocessing.parallelProcessRunner(parallelAgent.calculateAverageExpectedError, fastqList)
     averageExpectedErrorMatrix = numpy.stack([expectedErrorArray[1] for expectedErrorArray in expectedErrorReturns])
     averageExpectedErrorArray = numpy.mean(averageExpectedErrorMatrix, axis = 0)
@@ -160,13 +161,13 @@ def calculateExpectedErrorCurvesForFastqFolder(path:str, namingStandard:typing.T
     return forwardCurve, reverseCurve
 
 
-def calculateExpectedErrorCurvesForFastqList(fastqList, subsample:int=0, percentile:int=83, makePNG:bool=False, sampleGroupID:str=None, forwardPrimerLength:int=0, reversePrimerLength:int=0):
+def calculateExpectedErrorCurvesForFastqList(fastqList, subsample:int=0, percentile:int=83, makePNG:bool=False, sampleGroupID:str=None, forwardPrimerLength:int=0, reversePrimerLength:int=0, forwardReadTrimOrPadLength:int=0, reverseReadTrimOrPadLength:int=0):
     if not sampleGroupID:
         sampleGroupID = fastqList[0].group
     forwardFastqs = [fastq for fastq in fastqList if fastq.direction == 1]
     reverseFastqs = [fastq for fastq in fastqList if fastq.direction == 2]
-    forwardExpectedErrorArray = makeExpectedErrorPercentileArrayForFastqList(forwardFastqs, subsample, percentile, forwardPrimerLength)
-    reverseExpectedErrorArray = makeExpectedErrorPercentileArrayForFastqList(reverseFastqs, subsample, percentile, reversePrimerLength)
+    forwardExpectedErrorArray = makeExpectedErrorPercentileArrayForFastqList(forwardFastqs, subsample, percentile, forwardPrimerLength, forwardReadTrimOrPadLength)
+    reverseExpectedErrorArray = makeExpectedErrorPercentileArrayForFastqList(reverseFastqs, subsample, percentile, reversePrimerLength, reverseReadTrimOrPadLength)
     forwardPositions, forwardValues = makeXAndYValuesForPositionArray(forwardExpectedErrorArray)
     reversePositions, reverseValues = makeXAndYValuesForPositionArray(reverseExpectedErrorArray)
     forwardCurve = fitExponentialCurve(forwardPositions, forwardValues, makePNG, "%s forward reads. %s percentile" %(sampleGroupID, ordinal(percentile)))

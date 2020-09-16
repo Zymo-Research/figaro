@@ -17,10 +17,27 @@ def buildQualityMatrixPaired(forward:str, reverse:str):
     return buildQualityMatrix(forward), buildQualityMatrix(reverse)
 
 
-def buildExpectedErrorMatrix(path:str, superLean:bool = False, startPosition:int = 0, subsample:int=0, leftTrim:int=0, rightTrim:int=0):
+def buildExpectedErrorMatrix(path:str, superLean:bool = False, startPosition:int = 0, subsample:int=0, leftTrim:int=0, rightTrim:int=0, padOrTrimToLength:int=0):
     import numpy
     from . import qualityScoreHandler
     from .fastqHandler import FastqFile
+
+    def padAndTrimEEMatrix():
+        padValue = numpy.NaN
+        for row in expectedErrorMatrix:
+            if len(row) == padOrTrimToLength:
+                continue
+            elif len(row) < padOrTrimToLength:
+                neededValues = padOrTrimToLength - len(row)
+                for i in range(neededValues):
+                    row.append(padValue)
+            elif len(row) > padOrTrimToLength:
+                trimValues = len(row) - padOrTrimToLength
+                for i in range(trimValues):
+                    del row[-1]
+            else:
+                raise RuntimeError("This is logically impossible, or at least should be, and needs to be investigated")
+
     fastq = FastqFile(path, depth = 0, subsample = subsample, leftTrim=leftTrim, rightTrim=rightTrim)
     expectedErrorMatrix = []
     dataType = 'float16'
@@ -29,6 +46,8 @@ def buildExpectedErrorMatrix(path:str, superLean:bool = False, startPosition:int
     for line in fastq:
         expectedErrorLineList = qualityScoreHandler.cumulativeExpectedErrorArray(line.quality, fastq.qualityScoreScheme)[startPosition:]
         expectedErrorMatrix.append(expectedErrorLineList)  #low precision floating point. Usually users are looking for whole numbers anyway
+    if padOrTrimToLength > 0:
+        padAndTrimEEMatrix()
     fastq.close()
     return numpy.array(expectedErrorMatrix, dataType, order='F')
 
