@@ -19,7 +19,7 @@ def getApplicationParameters():
     parameters.addParameter("minimumOverlap", int, default=default.minOverlap, lowerBound=5, upperBound=30)
     parameters.addParameter("subsample", int, default=default.subsample, lowerBound=-1)
     parameters.addParameter("percentile", int, default = default.percentile, lowerBound=1, upperBound=100)
-    parameters.addParameter("fileNamingStandard", str, default="illumina", externalValidation=True)
+    parameters.addParameter("fileNamingStandard", str, default="nononsense", externalValidation=True)
     parameters.checkCreatedFileStructures()
     if not parameters.fileNamingStandard.value.lower() in figaroSupport.fileNamingStandards.aliasList.keys():
         raise ValueError("%s is not a valid naming standard alias" %parameters.fileNamingStandard.value)
@@ -48,7 +48,7 @@ def parseArgs():
     parser.add_argument("-m", "--minimumOverlap", help = "Minimum overlap between the paired-end reads", default=default.minOverlap, type=int)
     parser.add_argument("-s", "--subsample", help = "Subsampling level (will analyze approximately 1/x reads", default=default.subsample, type=int)
     parser.add_argument("-p", "--percentile", help = "Percentile to use for expected error model", default=default.percentile, type=int)
-    parser.add_argument("-F", "--fileNamingStandard", help = "File naming standard to use", default = "illumina")
+    parser.add_argument("-F", "--fileNamingStandard", help = "File naming standard to use", default = "nononsense")
     parser.add_argument("-l", "--logFile", help = "Log file path", default = None)
     return parser.parse_args()
 
@@ -185,7 +185,7 @@ def saveResultOutput(outputDirectory:str, outputResultTableFileName:str, resultT
     return outputResultTablePath, outputForwardCurvePath, outputReverseCurvePath
 
 
-def runAnalysis(inputDirectory:str, ampliconLength:int, forwardPrimerLength:int, reversePrimerLength:int, minimumOverlap:int=20, fileNamingStandard:str="illumina", subsample:int = -1, percentile:int=83):
+def runAnalysis(inputDirectory:str, ampliconLength:int, forwardPrimerLength:int, reversePrimerLength:int, minimumOverlap:int=20, fileNamingStandard:str="nononsense", subsample:int = -1, percentile:int=83):
     import os
     if not os.path.isdir(inputDirectory):
         raise NotADirectoryError("Unable to find directory at %s" %inputDirectory)

@@ -3,7 +3,8 @@ aliasList = {"zymo": "zymo",
              "zymoservicesnamingstandard": "zymo",
              "zymoservices": "zymo",
              "illumina": "illumina",
-             "keriksson": "keriksson"}
+             "keriksson": "keriksson",
+             "nononsense": "nononsense"}
 
 class NamingStandard(object):
 
@@ -44,6 +45,21 @@ class NamingStandard(object):
 
     def __xor__(self, other):
         return self.sameSample(other)
+
+
+class NoNonsenseNamingStandard(NamingStandard):
+
+    def getSampleInfo(self, fileName:str):
+        import re
+        import os
+        baseName = re.sub("\.(fq|fastq)(.gz)?$", "", os.path.basename(fileName))
+        direction = re.search("_R?[12]$", baseName)
+        if not direction:
+            raise ValueError("Could not infer read orientation from filename: {}".format(fileName))
+        direction = int(direction.group()[-1])
+        sample = group = re.sub("_R?[12]$", "", baseName)
+
+        return group, sample, direction
 
 
 class ZymoServicesNamingStandard(NamingStandard):
@@ -104,7 +120,8 @@ class ManualNamingStandard(NamingStandard):
 def loadNamingStandard(name:str):
     aliasObjectKey = {"zymo" : ZymoServicesNamingStandard,
                       "illumina" : IlluminaStandard,
-                      "keriksson": KErickssonStandard}
+                      "keriksson": KErickssonStandard,
+                      "nononsense": NoNonsenseNamingStandard}
     nameLower = name.lower()
     if not nameLower in aliasList:
         raise ValueError("%s is not a valid naming standard identifier" %name)
