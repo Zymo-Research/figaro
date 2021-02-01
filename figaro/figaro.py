@@ -1,15 +1,18 @@
 import logging
-try:  #This block is here to handle importing issues that happen when running this as a python package vs. running in a Docker or directly from the commandline.
-    import figaroSupport
-except ImportError:
-    from . import figaroSupport
+#try:  #This block is here to handle importing issues that happen when running this as a python package vs. running in a Docker or directly from the commandline.
+#    import figaroSupport
+#except ImportError:
+#    from . import figaroSupport
+
+from figaro import environmentParameterParser, fileNamingStandards
+from figaro.defaults import standard as default
 
 
 def getApplicationParameters():
     import sys
     if len(sys.argv) > 1:
         return getApplicationParametersFromCommandLine()
-    parameters = figaroSupport.environmentParameterParser.EnvParameters()
+    parameters = environmentParameterParser.EnvParameters()
     parameters.addParameter("outputFileName", str, default=default.outputFileName, externalValidation=True)
     parameters.addParameter("ampliconLength", int, lowerBound=0, required=True)
     parameters.addParameter("forwardPrimerLength", int, required=True, lowerBound=0, upperBound=50)
@@ -21,7 +24,7 @@ def getApplicationParameters():
     parameters.addParameter("percentile", int, default = default.percentile, lowerBound=1, upperBound=100)
     parameters.addParameter("fileNamingStandard", str, default="nononsense", externalValidation=True)
     parameters.checkCreatedFileStructures()
-    if not parameters.fileNamingStandard.value.lower() in figaroSupport.fileNamingStandards.aliasList.keys():
+    if not parameters.fileNamingStandard.value.lower() in fileNamingStandards.aliasList.keys():
         raise ValueError("%s is not a valid naming standard alias" %parameters.fileNamingStandard.value)
     combinedReadLengths = parameters.ampliconLength.value + parameters.minimumOverlap.value
     parameters.sideLoadParameter("minimumCombinedReadLength", combinedReadLengths)
@@ -29,7 +32,7 @@ def getApplicationParameters():
         if character not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_.-":
             raise ValueError("Unusual character detected for output file name.  Contains %s" %character)
     if parameters.subsample.value == -1:
-        totalFileSize = figaroSupport.fastqAnalysis.getEstimatedFastqSizeSumFromDirectory(parameters.inputDirectory.value, parameters.fileNamingStandard.value)
+        totalFileSize = fastqAnalysis.getEstimatedFastqSizeSumFromDirectory(parameters.inputDirectory.value, parameters.fileNamingStandard.value)
         fastqGigabytes = totalFileSize / 1000000000
         parameters.subsample.value = round(fastqGigabytes * 10)
     return parameters
@@ -58,7 +61,7 @@ def getApplicationParametersFromCommandLine():
     args = parseArgs()
     outputFileName = args.outputFileName
     ampliconLength = args.ampliconLength
-    if not args.fileNamingStandard.lower() in figaroSupport.fileNamingStandards.aliasList.keys():
+    if not args.fileNamingStandard.lower() in fileNamingStandards.aliasList.keys():
         raise ValueError("%s is not a valid naming standard alias" %args.fileNamingStandard)
     fileNamingStandard = args.fileNamingStandard
     if not ampliconLength > 0:
@@ -80,7 +83,7 @@ def getApplicationParametersFromCommandLine():
         raise ValueError("Minimum overlap must be a positive integer. %s was given." %minimumOverlap)
     subsample = args.subsample
     if subsample < 0:
-        totalFileSize = figaroSupport.fastqAnalysis.getEstimatedFastqSizeSumFromDirectory(inputDirectory, fileNamingStandard)
+        totalFileSize = fastqAnalysis.getEstimatedFastqSizeSumFromDirectory(inputDirectory, fileNamingStandard)
         fastqGigabytes = totalFileSize / 1000000000
         subsample = round(fastqGigabytes * 10)
     percentile = args.percentile
@@ -88,7 +91,7 @@ def getApplicationParametersFromCommandLine():
         raise ValueError("Percentile must be an integer value between 0 and 100. %s was given." %percentile)
     combinedReadLengths = ampliconLength + minimumOverlap
     # side-load args into parameter types
-    parameters = figaroSupport.environmentParameterParser.EnvParameters()
+    parameters = environmentParameterParser.EnvParameters()
     parameters.sideLoadParameter("outputFileName", outputFileName)
     parameters.sideLoadParameter("ampliconLength", ampliconLength)
     parameters.sideLoadParameter("forwardPrimerLength", forwardPrimerLength)
@@ -106,7 +109,7 @@ def getApplicationParametersFromCommandLine():
 def getLoggingParameters():
     import sys
     import os
-    loggingParameters = figaroSupport.environmentParameterParser.EnvParameters()
+    loggingParameters = environmentParameterParser.EnvParameters()
     if len(sys.argv) > 1:
         args = parseArgs()
         if args.logFile:
@@ -128,13 +131,18 @@ def getLoggingParameters():
     return loggingParameters
 
 
-def loadDefaultPackage():
-    defaultParameters = figaroSupport.environmentParameterParser.EnvParameters()
-    defaultParameters.addParameter("defaultPackageName", str, default="standard", externalValidation=True)
-    return figaroSupport.defaultParser.loadDefaultModule(defaultParameters.defaultPackageName.value)
+#def loadDefaultPackage():
+#    defaultParameters = environmentParameterParser.EnvParameters()
+#    defaultParameters.addParameter("defaultPackageName", str, default="standard", externalValidation=True)
+#    return defaultParser.loadDefaultModule(defaultParameters.defaultPackageName.value)
 
 
 def setLogging():
+    loggingFormat = "%(levelname)s:%(name)s:%(message)s"
+    logger = logging.getLogger(__name__)
+    logger.setLevel(
+        logging.DEBUG)  # Do not change this line unless you know exactly what you are doing any why you are doing it. This will mess up logging in a way that can be hard to trace back.
+    logger.debug("Starting analysis")
     loggingParameters = getLoggingParameters()
     formatter = logging.Formatter(loggingFormat)
     logStreamHandle = logging.StreamHandler()
@@ -190,30 +198,32 @@ def runAnalysis(inputDirectory:str, ampliconLength:int, forwardPrimerLength:int,
     if not os.path.isdir(inputDirectory):
         raise NotADirectoryError("Unable to find directory at %s" %inputDirectory)
     if subsample == -1:
-        totalFileSize = figaroSupport.fastqAnalysis.getEstimatedFastqSizeSumFromDirectory(inputDirectory, fileNamingStandard)
+        totalFileSize = fastqAnalysis.getEstimatedFastqSizeSumFromDirectory(inputDirectory, fileNamingStandard)
         fastqGigabytes = totalFileSize / 1000000000
         subsample = round(fastqGigabytes * 10)
-    resultTable, forwardCurve, reverseCurve = figaroSupport.trimParameterPrediction.performAnalysisLite(inputDirectory, ampliconLength + minimumOverlap, subsample=subsample, percentile=percentile, forwardPrimerLength=forwardPrimerLength, reversePrimerLength=reversePrimerLength, namingStandardAlias=fileNamingStandard)
+    resultTable, forwardCurve, reverseCurve = trimParameterPrediction.performAnalysisLite(inputDirectory, ampliconLength + minimumOverlap, subsample=subsample, percentile=percentile, forwardPrimerLength=forwardPrimerLength, reversePrimerLength=reversePrimerLength, namingStandardAlias=fileNamingStandard)
     return resultTable, forwardCurve, reverseCurve
 
-
-if __name__ == "__main__":
+def main():
     import datetime
     import os
     startTime = datetime.datetime.now()
-    default = loadDefaultPackage()
-    loggingFormat = "%(levelname)s:%(name)s:%(message)s"
-    logger = logging.getLogger(__name__)
-    logger.setLevel(
-        logging.DEBUG)  # Do not change this line unless you know exactly what you are doing any why you are doing it. This will mess up logging in a way that can be hard to trace back.
+    # default = loadDefaultPackage()
+    #loggingFormat = "%(levelname)s:%(name)s:%(message)s"
+    #logger = logging.getLogger(__name__)
+    #logger.setLevel(
+    #    logging.DEBUG)  # Do not change this line unless you know exactly what you are doing any why you are doing it. This will mess up logging in a way that can be hard to trace back.
     setLogging()
     parameters = getApplicationParameters()
-    logger.debug("Starting analysis")
+    #logger.debug("Starting analysis")
     fileNamingStandard = parameters.fileNamingStandard.value
-    resultTable, forwardCurve, reverseCurve = figaroSupport.trimParameterPrediction.performAnalysisLite(parameters.inputDirectory.value, parameters.minimumCombinedReadLength.value, subsample =  parameters.subsample.value, percentile = parameters.percentile.value, forwardPrimerLength=parameters.forwardPrimerLength.value, reversePrimerLength=parameters.reversePrimerLength.value, namingStandardAlias=fileNamingStandard)
+    resultTable, forwardCurve, reverseCurve = trimParameterPrediction.performAnalysisLite(parameters.inputDirectory.value, parameters.minimumCombinedReadLength.value, subsample =  parameters.subsample.value, percentile = parameters.percentile.value, forwardPrimerLength=parameters.forwardPrimerLength.value, reversePrimerLength=parameters.reversePrimerLength.value, namingStandardAlias=fileNamingStandard)
     for result in resultTable:
         print(result)
     resultTableFileName = os.path.join(parameters.outputDirectory.value, parameters.outputFileName.value)
     saveResultOutput(parameters.outputDirectory.value, parameters.outputFileName.value, resultTable, forwardCurve, reverseCurve)
     print("Run time: %s" %(datetime.datetime.now() - startTime))
     exit(0)
+
+if __name__ == "__main__":
+    main()

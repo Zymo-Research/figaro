@@ -1,0 +1,10 @@
+name: figaro 
+channels:
+  - bioconda
+  - defaults
+  - conda-forge
+dependencies:
+  - python>=3.7
+  - numpy>=1.13.1
+  - scipy>=1.2.1
+  - matplotlib>=3.0.2
