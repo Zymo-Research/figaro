@@ -4,7 +4,8 @@ aliasList = {"zymo": "zymo",
              "zymoservices": "zymo",
              "illumina": "illumina",
              "keriksson": "keriksson",
-             "fvieira": "fvieira"}
+             "fvieira": "fvieira",
+             "yzhang": "yzhang"}
 
 class NamingStandard(object):
 
@@ -104,6 +105,22 @@ class FVieiraStandard(NamingStandard):
         return group, sample, direction
 
 
+class YZhangStandard(NamingStandard):
+
+    def getSampleInfo(self, fileName:str):
+        basename = fileName.split(".")[0]
+        group = "default"
+        try:
+            sample, seqType, direction = basename.split("_")
+            direction = direction.replace("R", "")
+            direction = direction.replace("r", "")
+            direction = int(direction)
+        except ValueError:
+            raise ValueError("%s does not appear to be a valid file for this standard. Please check file naming convention argument." %fileName)
+
+        return group, sample, direction
+
+
 class ManualNamingStandard(NamingStandard):
     __slots__ = ["fileName", "fileDirectory", "filePath", "sampleNumber", "group", "direction", "sampleID"]
 
@@ -122,7 +139,8 @@ def loadNamingStandard(name:str):
     aliasObjectKey = {"zymo" : ZymoServicesNamingStandard,
                       "illumina" : IlluminaStandard,
                       "keriksson": KErickssonStandard,
-                      "fvieira": FVieiraStandard}
+                      "fvieira": FVieiraStandard,
+                      "yzhang": YZhangStandard}
     nameLower = name.lower()
     if not nameLower in aliasList:
         raise ValueError("%s is not a valid naming standard identifier" %name)
