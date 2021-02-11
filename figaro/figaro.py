@@ -1,12 +1,7 @@
 import logging
-#try:  #This block is here to handle importing issues that happen when running this as a python package vs. running in a Docker or directly from the commandline.
-#    import figaroSupport
-#except ImportError:
-#    from . import figaroSupport
 
-from figaro import environmentParameterParser, fileNamingStandards
+from figaro import environmentParameterParser, fileNamingStandards, fastqAnalysis, trimParameterPrediction
 from figaro.defaults import standard as default
-
 
 def getApplicationParameters():
     import sys
@@ -129,13 +124,6 @@ def getLoggingParameters():
         os.makedirs(logFilePath)
     loggingParameters.checkCreatedFileStructures()
     return loggingParameters
-
-
-#def loadDefaultPackage():
-#    defaultParameters = environmentParameterParser.EnvParameters()
-#    defaultParameters.addParameter("defaultPackageName", str, default="standard", externalValidation=True)
-#    return defaultParser.loadDefaultModule(defaultParameters.defaultPackageName.value)
-
 
 def setLogging():
     loggingFormat = "%(levelname)s:%(name)s:%(message)s"
