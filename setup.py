@@ -26,9 +26,6 @@ with open(path.join(here, "DESCRIPTION.md"), encoding="utf-8") as description:
         version=version,
         description="FIGARO - An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters",
         long_description=long_description,
-        #url="https://github.com/zellerlab/stag",
-        #author="Alessio Milanese",
-        #author_email="milanese.alessio@gmail.com",
         license="GPLv3",
         classifiers=[
             "Development Status :: 4 - Beta",
@@ -48,8 +45,6 @@ with open(path.join(here, "DESCRIPTION.md"), encoding="utf-8") as description:
         },
         scripts=[],
         package_data={},
-        #    "stag.test": ["gene.hmm", "sequences.fasta", "sequences.taxonomy"]
-        #},
         include_package_data=True,
         data_files=[],
     )
