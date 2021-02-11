@@ -21,8 +21,11 @@ docker container run --rm -e AMPLICONLENGTH=[amplicon length] -e FORWARDPRIMERLE
 ```
 git clone https://github.com/Zymo-Research/figaro.git
 cd figaro
-pip3 install -r requirements.txt
-python3 figaro.py -i /path/to/fastq/directory -o /path/to/output/files -a [amplicon length] \
+# depending on your system configuration, the following commands
+# are either python3/pip3 or python/pip
+python3 setup.py bdist_wheel
+pip3 install --force-reinstall dist/*.whl
+figaro -i /path/to/fastq/directory -o /path/to/output/files -a [amplicon length] \
     -f [forward primer length] -r [reverse primer length]
 ```
 
@@ -140,7 +143,7 @@ The user can set several parameters using environment variables passed into the 
 
 #### As Python package
 
-FIGARO will analyze an entire directory of FASTQ files on the system. Run the following command from FIGARO's directory:
+FIGARO will analyze an entire directory of FASTQ files on the system. After installation, FIGARO analysis can be run from Python as follows:
 
 ```
 
