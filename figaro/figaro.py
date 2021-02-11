@@ -1,6 +1,6 @@
 import logging
 
-from figaro import environmentParameterParser, fileNamingStandards, fastqAnalysis, trimParameterPrediction
+from . import environmentParameterParser, fileNamingStandards, fastqAnalysis, trimParameterPrediction
 from figaro.defaults import standard as default
 
 def getApplicationParameters():
@@ -196,14 +196,8 @@ def main():
     import datetime
     import os
     startTime = datetime.datetime.now()
-    # default = loadDefaultPackage()
-    #loggingFormat = "%(levelname)s:%(name)s:%(message)s"
-    #logger = logging.getLogger(__name__)
-    #logger.setLevel(
-    #    logging.DEBUG)  # Do not change this line unless you know exactly what you are doing any why you are doing it. This will mess up logging in a way that can be hard to trace back.
     setLogging()
     parameters = getApplicationParameters()
-    #logger.debug("Starting analysis")
     fileNamingStandard = parameters.fileNamingStandard.value
     resultTable, forwardCurve, reverseCurve = trimParameterPrediction.performAnalysisLite(parameters.inputDirectory.value, parameters.minimumCombinedReadLength.value, subsample =  parameters.subsample.value, percentile = parameters.percentile.value, forwardPrimerLength=parameters.forwardPrimerLength.value, reversePrimerLength=parameters.reversePrimerLength.value, namingStandardAlias=fileNamingStandard)
     for result in resultTable:
@@ -211,7 +205,6 @@ def main():
     resultTableFileName = os.path.join(parameters.outputDirectory.value, parameters.outputFileName.value)
     saveResultOutput(parameters.outputDirectory.value, parameters.outputFileName.value, resultTable, forwardCurve, reverseCurve)
     print("Run time: %s" %(datetime.datetime.now() - startTime))
-    exit(0)
 
 if __name__ == "__main__":
     main()
