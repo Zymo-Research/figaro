@@ -5,8 +5,8 @@ aliasList = {"zymo": "zymo",
              "illumina": "illumina",
              "keriksson": "keriksson",
              "nononsense": "nononsense"}
-             "fvieira": "fvieira",
-             "yzhang": "yzhang"}
+            # "fvieira": "fvieira",
+            # "yzhang": "yzhang"}
 
 class NamingStandard(object):
 
@@ -156,8 +156,8 @@ def loadNamingStandard(name:str):
                       "illumina" : IlluminaStandard,
                       "keriksson": KErickssonStandard,
                       "nononsense": NoNonsenseNamingStandard}
-                      "fvieira": FVieiraStandard,
-                      "yzhang": YZhangStandard}
+                    #  "fvieira": FVieiraStandard,
+                    #  "yzhang": YZhangStandard}
     nameLower = name.lower()
     if not nameLower in aliasList:
         raise ValueError("%s is not a valid naming standard identifier" %name)
