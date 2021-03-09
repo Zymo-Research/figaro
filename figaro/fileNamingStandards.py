@@ -4,7 +4,7 @@ aliasList = {"zymo": "zymo",
              "zymoservices": "zymo",
              "illumina": "illumina",
              "keriksson": "keriksson",
-             "nononsense": "nononsense"}
+             "nononsense": "nononsense",
              "fvieira": "fvieira",
              "yzhang": "yzhang"}
 
@@ -155,7 +155,7 @@ def loadNamingStandard(name:str):
     aliasObjectKey = {"zymo" : ZymoServicesNamingStandard,
                       "illumina" : IlluminaStandard,
                       "keriksson": KErickssonStandard,
-                      "nononsense": NoNonsenseNamingStandard}
+                      "nononsense": NoNonsenseNamingStandard,
                       "fvieira": FVieiraStandard,
                       "yzhang": YZhangStandard}
     nameLower = name.lower()
