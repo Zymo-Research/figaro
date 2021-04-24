@@ -2,8 +2,11 @@ import os
 import logging
 import typing
 logger = logging.getLogger(__name__)
-from . import qualityScoreHandler
-from . import fileNamingStandards
+try:
+    from . import qualityScoreHandler
+    from . import fileNamingStandards
+except ImportError:
+    import qualityScoreHandler, fileNamingStandards
 
 class ReadMetadataLine(object):
 
@@ -232,7 +235,10 @@ class FastqFile(object):
         self.currentLine = 0
 
     def checkGzip(self, path):
-        from . import gzipIdentifier
+        try:
+            from . import gzipIdentifier
+        except ImportError:
+            import gzipIdentifier
         return gzipIdentifier.isGzipped(path)
 
     def getNextRead(self):

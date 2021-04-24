@@ -1,7 +1,15 @@
 import logging
 
-from . import environmentParameterParser, fileNamingStandards, fastqAnalysis, trimParameterPrediction
-from figaro.defaults import standard as default
+try:
+    from . import environmentParameterParser, fileNamingStandards, fastqAnalysis, trimParameterPrediction
+except ImportError:
+    import environmentParameterParser, fileNamingStandards, fastqAnalysis, trimParameterPrediction
+
+try:
+    from figaro.defaults import standard as default
+except ImportError:
+    import defaults.standard as default
+
 
 def getApplicationParameters():
     import sys

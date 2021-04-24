@@ -54,13 +54,13 @@ class NoNonsenseNamingStandard(NamingStandard):
     def getSampleInfo(self, fileName:str):
         import re
         import os
+        regex = '_R?([12])(_\\d\\d\\d)?$'
         baseName = re.sub("\.(fq|fastq)(.gz)?$", "", os.path.basename(fileName))
-        direction = re.search("_R?[12]$", baseName)
-        if not direction:
+        regexResult = re.search(regex, baseName)
+        if not regexResult:
             raise ValueError("Could not infer read orientation from filename: {}".format(fileName))
-        direction = int(direction.group()[-1])
-        sample = group = re.sub("_R?[12]$", "", baseName)
-
+        direction = int(regexResult[1])
+        sample = group = re.sub(regex, "", baseName)
         return group, sample, direction
 
 

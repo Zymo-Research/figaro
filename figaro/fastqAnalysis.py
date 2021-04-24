@@ -19,8 +19,12 @@ def buildQualityMatrixPaired(forward:str, reverse:str):
 
 def buildExpectedErrorMatrix(path:str, superLean:bool = False, startPosition:int = 0, subsample:int=0, leftTrim:int=0, rightTrim:int=0):
     import numpy
-    from . import qualityScoreHandler
-    from .fastqHandler import FastqFile
+    try:
+        from . import qualityScoreHandler
+        from .fastqHandler import FastqFile
+    except ImportError:
+        import qualityScoreHandler
+        from fastqHandler import FastqFile
     fastq = FastqFile(path, depth = 0, subsample = subsample, leftTrim=leftTrim, rightTrim=rightTrim)
     expectedErrorMatrix = []
     dataType = 'float16'
@@ -91,7 +95,10 @@ def makeAverageExpectedErrorLine(path:str):
 
 def getEstimatedFastqFileSizeSumFromList(fastqList:list):
     import os
-    from . import gzipIdentifier
+    try:
+        from . import gzipIdentifier
+    except ImportError:
+        import gzipIdentifier
     sum = 0
     for fastq in fastqList:
         fileSize = os.path.getsize(fastq.filePath)
@@ -102,8 +109,11 @@ def getEstimatedFastqFileSizeSumFromList(fastqList:list):
 
 def getEstimatedFastqSizeSumFromDirectory(path:str, fileNamingStandardAlias:str):
     import os
-    from . import fileNamingStandards
-    from . import fastqHandler
+    try:
+        from . import fileNamingStandards
+        from . import fastqHandler
+    except ImportError:
+        import fileNamingStandards, fastqHandler
     fileNamingStandard = fileNamingStandards.loadNamingStandard(fileNamingStandardAlias)
     if not os.path.isdir(path):
         raise NotADirectoryError("Unable to find a directory at %s" %path)

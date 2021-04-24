@@ -1,9 +1,12 @@
 import logging
 logger = logging.getLogger(__name__)
-from . import fileNamingStandards
-from . import fastqHandler
-from . import fastqAnalysis
-from . import expectedErrorCurve
+try:
+    from . import fileNamingStandards
+    from . import fastqHandler
+    from . import fastqAnalysis
+    from . import expectedErrorCurve
+except ImportError:
+    import fileNamingStandards, fastqHandler, fastqAnalysis, expectedErrorCurve
 import typing
 import numpy
 
@@ -245,7 +248,10 @@ class ExpectedErrorMatrixBuilderParallelAgent(object):
 
 def makeCombinedExpectedErrorMatrixForOneDirection(fastqList:list, sampleOrder:list, subsample:int, startPosition:int = 0, primerLength:int=0):
     import numpy
-    from . import easyMultiprocessing
+    try:
+        from . import easyMultiprocessing
+    except ImportError:
+        import easyMultiprocessing
     parallelBuildAgent = ExpectedErrorMatrixBuilderParallelAgent(startPosition, subsample, primerLength)
     expectedErrorMatrices = easyMultiprocessing.parallelProcessRunner(parallelBuildAgent.makeExpectedErrorMatrix, fastqList)
     combinedMatrixStarted = False
@@ -365,7 +371,10 @@ def parallelReadLengthChecker(fastq:fileNamingStandards.NamingStandard):
 
 
 def checkReadLengths(fastqList:list):
-    from . import easyMultiprocessing
+    try:
+        from . import easyMultiprocessing
+    except ImportError:
+        import easyMultiprocessing
     read1Data = []
     read2Data = []
     fastqReadLengthData = easyMultiprocessing.parallelProcessRunner(parallelReadLengthChecker, fastqList)
@@ -423,7 +432,10 @@ def performAnalysis(inputDirectory:str, minimumCombinedReadLength:int, subsample
 
 
 def performAnalysisLite(inputDirectory:str, minimumCombinedReadLength:int, subsample:int=0, percentile:int=83, fastqList:list = None, makeExpectedErrorPlots:bool = True, forwardPrimerLength:int=0, reversePrimerLength:int=0, namingStandardAlias:str = "illumina"):
-    from . import expectedErrorCurve
+    try:
+        from . import expectedErrorCurve
+    except:
+        import expectedErrorCurve
     namingStandard = fileNamingStandards.loadNamingStandard(namingStandardAlias)
     if not inputDirectory:
         if not fastqList:
@@ -434,6 +446,8 @@ def performAnalysisLite(inputDirectory:str, minimumCombinedReadLength:int, subsa
             raise ValueError("No fastq files found in input directory")
     sampleOrder = getSampleOrder(fastqList)
     forwardReadLength, reverseReadLength = checkReadLengths(fastqList)
+    print("Forward read length: %s" %forwardReadLength)
+    print("Reverse read length: %s" %reverseReadLength)
     forwardReadLength = forwardReadLength - forwardPrimerLength
     reverseReadLength = reverseReadLength - reversePrimerLength
     forwardCurve, reverseCurve = expectedErrorCurve.calculateExpectedErrorCurvesForFastqList(fastqList, subsample=subsample, percentile=percentile, makePNG=makeExpectedErrorPlots, forwardPrimerLength=forwardPrimerLength, reversePrimerLength=reversePrimerLength)

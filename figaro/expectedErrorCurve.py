@@ -1,6 +1,10 @@
-from . import fileNamingStandards
-from . import fastqHandler
-from . import fastqAnalysis
+
+try:
+    from . import fileNamingStandards
+    from . import fastqHandler
+    from . import fastqAnalysis
+except:
+    import fileNamingStandards, fastqHandler, fastqAnalysis
 import numpy
 import typing
 import collections
@@ -110,7 +114,10 @@ def makeExpectedErrorPercentileArrayForFastq(path:str, subsample:int=0, percenti
 
 
 def makeExpectedErrorPercentileArrayForFastqList(fastqList:list, subsample:int=0, percentile:int=83, primerLength:int=0):
-    from . import easyMultiprocessing
+    try:
+        from . import easyMultiprocessing
+    except ImportError:
+        import easyMultiprocessing
     parallelAgent = ParallelExpectedErrorPercentileAgent(subsample, percentile, primerLength)
     expectedErrorReturns = easyMultiprocessing.parallelProcessRunner(parallelAgent.calculateAverageExpectedError, fastqList)
     averageExpectedErrorMatrix = numpy.stack([expectedErrorArray[1] for expectedErrorArray in expectedErrorReturns])

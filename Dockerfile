@@ -13,4 +13,6 @@ RUN cd opt/figaro &&\
     pip3 install --upgrade pip &&\
     pip3 install -r requirements.txt
 
-CMD ["python3", "/opt/figaro/figaro.py"]
+ENV PYTHONUNBUFFERED=1
+
+CMD ["python3", "/opt/figaro/figaro/figaro.py"]
