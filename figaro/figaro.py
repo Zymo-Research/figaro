@@ -70,10 +70,10 @@ def getApplicationParametersFromCommandLine():
     if not ampliconLength > 0:
         raise ValueError("Amplicon length must be a positive integer. %s was given" %ampliconLength)
     forwardPrimerLength = args.forwardPrimerLength
-    if not forwardPrimerLength > 0:
+    if not forwardPrimerLength >= 0:
         raise ValueError("Forward primer length must be a positive integer. %s was given" %forwardPrimerLength)
     reversePrimerLength = args.reversePrimerLength
-    if not reversePrimerLength > 0:
+    if not reversePrimerLength >= 0:
         raise ValueError("Reverse primer length must be a positive integer. %s was given" %reversePrimerLength)
     inputDirectory = args.inputDirectory
     if not os.path.isdir(inputDirectory):
