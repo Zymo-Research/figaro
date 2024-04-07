@@ -1,3 +1,6 @@
+import typing
+import numpy
+
 import logging
 logger = logging.getLogger(__name__)
 try:
@@ -6,10 +9,10 @@ try:
     from . import fastqAnalysis
     from . import expectedErrorCurve
 except ImportError:
-    import fileNamingStandards, fastqHandler, fastqAnalysis, expectedErrorCurve
-import typing
-import numpy
-
+    import fileNamingStandards
+    import fastqHandler
+    import fastqAnalysis
+    import expectedErrorCurve
 
 class TrimParameterSet(object):
 
@@ -434,7 +437,7 @@ def performAnalysis(inputDirectory:str, minimumCombinedReadLength:int, subsample
 def performAnalysisLite(inputDirectory:str, minimumCombinedReadLength:int, subsample:int=0, percentile:int=83, fastqList:list = None, makeExpectedErrorPlots:bool = True, forwardPrimerLength:int=0, reversePrimerLength:int=0, namingStandardAlias:str = "illumina"):
     try:
         from . import expectedErrorCurve
-    except:
+    except ImportError:
         import expectedErrorCurve
     namingStandard = fileNamingStandards.loadNamingStandard(namingStandardAlias)
     if not inputDirectory:

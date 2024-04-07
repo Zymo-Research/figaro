@@ -6,7 +6,8 @@ try:
     from . import qualityScoreHandler
     from . import fileNamingStandards
 except ImportError:
-    import qualityScoreHandler, fileNamingStandards
+    import qualityScoreHandler
+    import fileNamingStandards
 
 class ReadMetadataLine(object):
 
@@ -161,7 +162,7 @@ class SequenceLine(object):
     def __eq__(self, other):
         if type(other) == SequenceLine:
             return self.sequence == other.sequence
-        elif type(other) == str:
+        elif isinstance(other, str):
             return self.sequence == SequenceLine(other).sequence
         else:
             logger.critical("Attempted to compare a sequence to something that is not a sequence line type or string. Value in question was type %s: %s" %(type(other), other))
@@ -280,7 +281,7 @@ class FastqFile(object):
             if self.fullValidation:
                 if not len(readBuffer[1]) == len(readBuffer[3]):
                     raise FastqValidationError("Got mismatched sequence and quality line lengths for line %s" %readBuffer)
-                if type(fastqLineSet.metadata) == str:
+                if isinstance(fastqLineSet.metadata, str):
                     metadata = ReadMetadataLine(str(fastqLineSet.metadata))
                 else:
                     metadata = fastqLineSet.metadata
@@ -356,13 +357,13 @@ class FastqFilePair(object):
         return nextPe1, nextPe2
 
     def runValidation(self, pe1:FastqLineSet, pe2:FastqLineSet):
-        if type(pe1.metadata) == str:
+        if isinstance(pe1.metadata, str):
             pe1Metadata = ReadMetadataLine(str(pe1.metadata))
         elif type(pe1.metadata) == ReadMetadataLine:
             pe1Metadata = pe1.metadata
         else:
             raise TypeError("Only able to compare metadata as string or metadata objects")
-        if type(pe2.metadata) == str:
+        if isinstance(pe2.metadata, str):
             pe2Metadata = ReadMetadataLine(str(pe2.metadata))
         elif type(pe1.metadata) == ReadMetadataLine:
             pe2Metadata = pe2.metadata

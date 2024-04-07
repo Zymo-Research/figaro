@@ -113,7 +113,8 @@ def getEstimatedFastqSizeSumFromDirectory(path:str, fileNamingStandardAlias:str)
         from . import fileNamingStandards
         from . import fastqHandler
     except ImportError:
-        import fileNamingStandards, fastqHandler
+        import fileNamingStandards
+        import fastqHandler
     fileNamingStandard = fileNamingStandards.loadNamingStandard(fileNamingStandardAlias)
     if not os.path.isdir(path):
         raise NotADirectoryError("Unable to find a directory at %s" %path)

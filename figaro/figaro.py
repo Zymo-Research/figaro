@@ -3,7 +3,10 @@ import logging
 try:
     from . import environmentParameterParser, fileNamingStandards, fastqAnalysis, trimParameterPrediction
 except ImportError:
-    import environmentParameterParser, fileNamingStandards, fastqAnalysis, trimParameterPrediction
+    import environmentParameterParser
+    import fileNamingStandards
+    import fastqAnalysis
+    import trimParameterPrediction
 
 try:
     from figaro.defaults import standard as default
@@ -27,7 +30,7 @@ def getApplicationParameters():
     parameters.addParameter("percentile", int, default = default.percentile, lowerBound=1, upperBound=100)
     parameters.addParameter("fileNamingStandard", str, default="nononsense", externalValidation=True)
     parameters.checkCreatedFileStructures()
-    if not parameters.fileNamingStandard.value.lower() in fileNamingStandards.aliasList.keys():
+    if parameters.fileNamingStandard.value.lower() not in fileNamingStandards.aliasList.keys():
         raise ValueError("%s is not a valid naming standard alias" %parameters.fileNamingStandard.value)
     combinedReadLengths = parameters.ampliconLength.value + parameters.minimumOverlap.value
     parameters.sideLoadParameter("minimumCombinedReadLength", combinedReadLengths)
@@ -64,7 +67,7 @@ def getApplicationParametersFromCommandLine():
     args = parseArgs()
     outputFileName = args.outputFileName
     ampliconLength = args.ampliconLength
-    if not args.fileNamingStandard.lower() in fileNamingStandards.aliasList.keys():
+    if args.fileNamingStandard.lower() not in fileNamingStandards.aliasList.keys():
         raise ValueError("%s is not a valid naming standard alias" %args.fileNamingStandard)
     fileNamingStandard = args.fileNamingStandard
     if not ampliconLength > 0:

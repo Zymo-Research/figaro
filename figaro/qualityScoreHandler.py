@@ -24,7 +24,7 @@ class EncodingScheme(object):
         return rangeEnd - rangeStart
 
     def toPError(self, score:[int, str]):
-        if type(score) == str:
+        if isinstance(score, str):
             if len(score) == 1:
                 score = convertCharacterToScore(score, self.base)
             else:
@@ -46,7 +46,7 @@ class EncodingScheme(object):
         if not self.eliminated:
             qualityString = str(qualityString)
             for character in qualityString:
-                if not character in self.characterSet:
+                if character not in self.characterSet:
                     self.eliminated = True
                     break
 
@@ -54,7 +54,7 @@ class EncodingScheme(object):
         return self.name
 
     def __eq__(self, other:[str]):
-        if not type(other) in [str, EncodingScheme]:
+        if not isinstance(other, (str, EncodingScheme)):
             raise TypeError("Unable to compare encoding scheme types with anything but string or other EncodingScheme objects")
         return self.name == str(other)
 

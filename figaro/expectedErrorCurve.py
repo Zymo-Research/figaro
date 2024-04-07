@@ -3,8 +3,11 @@ try:
     from . import fileNamingStandards
     from . import fastqHandler
     from . import fastqAnalysis
-except:
-    import fileNamingStandards, fastqHandler, fastqAnalysis
+except ImportError:
+    import fileNamingStandards
+    import fastqHandler
+    import fastqAnalysis
+
 import numpy
 import typing
 import collections
