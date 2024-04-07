@@ -1,46 +1,35 @@
 # coding: utf-8
-from setuptools import setup, find_packages
-from codecs import open
-from os import path
-import sys
+import os
+from setuptools import setup
 
-from figaro import __version__ as version
+def version():
+    setupDir = os.path.dirname(os.path.realpath(__file__))
+    versionFile = open(os.path.join(setupDir, 'figaro', 'VERSION'))
+    return versionFile.readline().strip()
 
-here = path.abspath(path.dirname("__file__"))
+def readme():
+    with open('README.md') as f:
+        return f.read()
 
-with open(path.join(here, "DESCRIPTION.md"), encoding="utf-8") as description:
-    description = long_description = description.read()
-
-    name="figaro"
-    version = version
-
-    if sys.version_info.major != 3:
-        raise EnvironmentError("""{toolname} is a python module that requires python3, and is not compatible with python2.""".format(toolname=name))
-
-    setup(
-        name=name,
-        version=version,
-        description="FIGARO - An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters",
-        long_description=long_description,
-        license="GPLv3",
-        classifiers=[
-            "Development Status :: 4 - Beta",
-            "Topic :: Scientific Engineering :: Bio/Informatics",
-            "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
-            "Operating System :: POSIX :: Linux",
-            "Programming Language :: Python :: 3.7"
-        ],
-        zip_safe=False,
-        keywords="",
-        packages=find_packages(exclude=["test"]),
-        install_requires=list(req.strip() for req in open("requirements.txt")),
-        entry_points={
-            "console_scripts": [
-                "figaro=figaro.figaro:main"
-            ],
-        },
-        scripts=[],
-        package_data={},
-        include_package_data=True,
-        data_files=[],
-    )
+setup(
+    name="figaro",
+    version=version(),
+    description="FIGARO - An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters",
+    long_description=readme(),
+    long_description_content_type='text/markdown',
+    license="GPLv3",
+    url="https://github.com/Zymo-Research/figaro",
+    packages=["figaro", "figaro.defaults"],
+    package_data={'figaro': ['VERSION']},
+    scripts=["bin/figaro"],
+    include_package_data=True,
+    install_requires=list(req.strip() for req in open("requirements.txt")),
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Topic :: Scientific Engineering :: Bio/Informatics",
+        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3.7"
+    ],
+    zip_safe=False
+)

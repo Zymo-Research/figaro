@@ -1,0 +1,14 @@
+1.1.2
+- added a naming scheme
+
+1.1.1
+- fixed variance crash
+
+1.1.0
+- working as python import
+
+1.0.1
+- first working version. Updated README.
+
+1.0.0
+- docker appears to be working. Command line appears to be working.
