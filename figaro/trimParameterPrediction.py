@@ -1,16 +1,13 @@
-import logging
-logger = logging.getLogger(__name__)
-try:
-    from . import fileNamingStandards
-    from . import fastqHandler
-    from . import fastqAnalysis
-    from . import expectedErrorCurve
-except ImportError:
-    import fileNamingStandards, fastqHandler, fastqAnalysis, expectedErrorCurve
 import typing
 import numpy
+import logging
 
+from figaro import fileNamingStandards
+from figaro import fastqHandler
+from figaro import fastqAnalysis
+from figaro import expectedErrorCurve
 
+logger = logging.getLogger(__name__)
 class TrimParameterSet(object):
 
     __slots__ = ["forwardTrimPosition", "reverseTrimPosition", "forwardMaxExpectedError", "reverseMaxExpectedError", "readRetention", "score"]
@@ -132,7 +129,7 @@ class Q2ArrayParallelBuilderAgent(object):
 
 def makeCombinedQ2ArrayForOneDirection(fastqList:list, sampleOrder:list, subsample:int=0, primerLength:int=0):
     import numpy
-    from . import easyMultiprocessing
+    from figaro import easyMultiprocessing
     parallelBuildAgent = Q2ArrayParallelBuilderAgent(subsample, primerLength)
     firstQ2Arrays = easyMultiprocessing.parallelProcessRunner(parallelBuildAgent.makeQ2Array, fastqList)
     combinedArrayStarted = False
@@ -197,7 +194,7 @@ class NBaseArrayParallelBuilderAgent(object):
 
 def makeCombinedFirstNBaseArrayForOneDirection(fastqList:list, sampleOrder:list, subsample:int=0, primerLength:int=0):
     import numpy
-    from . import easyMultiprocessing
+    from figaro import easyMultiprocessing
     parallelBuildAgent = NBaseArrayParallelBuilderAgent(subsample, primerLength)
     firstNBaseArrays = easyMultiprocessing.parallelProcessRunner(parallelBuildAgent.makeFirstNBaseArray, fastqList)
     combinedArrayStarted = False
@@ -248,10 +245,7 @@ class ExpectedErrorMatrixBuilderParallelAgent(object):
 
 def makeCombinedExpectedErrorMatrixForOneDirection(fastqList:list, sampleOrder:list, subsample:int, startPosition:int = 0, primerLength:int=0):
     import numpy
-    try:
-        from . import easyMultiprocessing
-    except ImportError:
-        import easyMultiprocessing
+    from figaro import easyMultiprocessing
     parallelBuildAgent = ExpectedErrorMatrixBuilderParallelAgent(startPosition, subsample, primerLength)
     expectedErrorMatrices = easyMultiprocessing.parallelProcessRunner(parallelBuildAgent.makeExpectedErrorMatrix, fastqList)
     combinedMatrixStarted = False
@@ -371,10 +365,7 @@ def parallelReadLengthChecker(fastq:fileNamingStandards.NamingStandard):
 
 
 def checkReadLengths(fastqList:list):
-    try:
-        from . import easyMultiprocessing
-    except ImportError:
-        import easyMultiprocessing
+    from figaro import easyMultiprocessing
     read1Data = []
     read2Data = []
     fastqReadLengthData = easyMultiprocessing.parallelProcessRunner(parallelReadLengthChecker, fastqList)
@@ -409,7 +400,7 @@ def checkReadLengths(fastqList:list):
 
 
 def performAnalysis(inputDirectory:str, minimumCombinedReadLength:int, subsample:int=0, percentile:int=83, fastqList:list = None, makeExpectedErrorPlots:bool = True, forwardPrimerLength:int=0, reversePrimerLength:int=0):
-    from . import expectedErrorCurve
+    from figaro import expectedErrorCurve
     if not inputDirectory:
         if not fastqList:
             raise ValueError("No input directory and no fastq list were given.")
@@ -432,10 +423,7 @@ def performAnalysis(inputDirectory:str, minimumCombinedReadLength:int, subsample
 
 
 def performAnalysisLite(inputDirectory:str, minimumCombinedReadLength:int, subsample:int=0, percentile:int=83, fastqList:list = None, makeExpectedErrorPlots:bool = True, forwardPrimerLength:int=0, reversePrimerLength:int=0, namingStandardAlias:str = "illumina"):
-    try:
-        from . import expectedErrorCurve
-    except:
-        import expectedErrorCurve
+    from figaro import expectedErrorCurve
     namingStandard = fileNamingStandards.loadNamingStandard(namingStandardAlias)
     if not inputDirectory:
         if not fastqList:

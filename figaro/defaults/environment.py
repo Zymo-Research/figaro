@@ -1,5 +1,6 @@
 import os
 import datetime
+
 timestamp = str(datetime.datetime.now().timestamp()).replace(".", "")
 dataFolder = "/data"
 inputFolder = os.path.join(dataFolder, "input")

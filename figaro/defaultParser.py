@@ -29,7 +29,7 @@ def loadDefaultModule(name:str):
     import importlib
     packageID = name.lower()
     defaultPackages = getDefaultPackageDict()
-    if not packageID in defaultPackages:
+    if packageID not in defaultPackages:
         logger.error("Attempted to load default package %s. Only default packages found: %s" %(name, defaultPackages))
         raise ValueError("Unable to find a default package called %s" %name)
     logger.info("Loading %s default package" %name)

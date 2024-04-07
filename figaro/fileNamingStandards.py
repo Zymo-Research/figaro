@@ -159,6 +159,6 @@ def loadNamingStandard(name:str):
                       "fvieira": FVieiraStandard,
                       "yzhang": YZhangStandard}
     nameLower = name.lower()
-    if not nameLower in aliasList:
+    if nameLower not in aliasList:
         raise ValueError("%s is not a valid naming standard identifier" %name)
     return aliasObjectKey[aliasList[nameLower]]

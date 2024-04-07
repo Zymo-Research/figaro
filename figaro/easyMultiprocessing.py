@@ -37,7 +37,7 @@ def parallelProcessRunner(processor, itemsToProcess, coreLimit:int = 0, filterFu
     logger.debug("Making assertions")
     assert callable(processor), "Processor must be a callable function/method"
     assert len(inspect.signature(processor).parameters) == 1, "Processor function must take one argument"
-    assert isinstance(itemsToProcess, collections.Iterable), "Items to process must be an iterable of some kind"
+    assert isinstance(itemsToProcess, collections.abc.Iterable), "Items to process must be an iterable of some kind"
     assert coresPerProcess > 0, "Cores per process must be a positive integer"
     logger.debug("Calculating cores available")
     coreLimit = max([0, coreLimit])

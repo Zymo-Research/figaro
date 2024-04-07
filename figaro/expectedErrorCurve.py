@@ -1,20 +1,18 @@
 
-try:
-    from . import fileNamingStandards
-    from . import fastqHandler
-    from . import fastqAnalysis
-except:
-    import fileNamingStandards, fastqHandler, fastqAnalysis
 import numpy
 import typing
 import collections
+
+from figaro import fileNamingStandards
+from figaro import fastqHandler
+from figaro import fastqAnalysis
 
 
 class ExponentialFit(object):
 
     __slots__ = ['a', 'b', 'c', 'covariance', 'rSquared', 'curvePNG']
 
-    def __init__(self, a:float, b:float, c:float, covariance:collections.Iterable = None, rSquared:float = None, curvePNG:str=None):
+    def __init__(self, a:float, b:float, c:float, covariance:collections.abc.Iterable = None, rSquared:float = None, curvePNG:str=None):
         self.a = a
         self.b = b
         self.c = c
@@ -39,7 +37,7 @@ def exponentialPrototypeFunction(x, a, b, c):
     return a * numpy.exp(b * x) + c
 
 
-def fitExponentialCurve(xValues:collections.Iterable, yValues:collections.Iterable, generateImage:bool=False, plotName:str="Expected error by position"):
+def fitExponentialCurve(xValues:collections.abc.Iterable, yValues:collections.abc.Iterable, generateImage:bool=False, plotName:str="Expected error by position"):
     import scipy.optimize
     import scipy.stats
     coefficients, covariance = scipy.optimize.curve_fit(exponentialPrototypeFunction, xValues, yValues, p0=(0.03, 0.015, 0), bounds=((-2, -1, -8), (2, 1, 8)))
@@ -114,10 +112,7 @@ def makeExpectedErrorPercentileArrayForFastq(path:str, subsample:int=0, percenti
 
 
 def makeExpectedErrorPercentileArrayForFastqList(fastqList:list, subsample:int=0, percentile:int=83, primerLength:int=0):
-    try:
-        from . import easyMultiprocessing
-    except ImportError:
-        import easyMultiprocessing
+    from figaro import easyMultiprocessing
     parallelAgent = ParallelExpectedErrorPercentileAgent(subsample, percentile, primerLength)
     expectedErrorReturns = easyMultiprocessing.parallelProcessRunner(parallelAgent.calculateAverageExpectedError, fastqList)
     averageExpectedErrorMatrix = numpy.stack([expectedErrorArray[1] for expectedErrorArray in expectedErrorReturns])
@@ -137,7 +132,7 @@ def makeExpectedErrorPercentileArraysForDirectory(path:str, namingStandard:typin
     return forwardExpectedErrorArray, reverseExpectedErrorArray
 
 
-def makeXAndYValuesForPositionArray(positionArray:collections.Iterable):
+def makeXAndYValuesForPositionArray(positionArray:collections.abc.Iterable):
     xValues = []
     yValues = []
     for position, value in enumerate(positionArray):

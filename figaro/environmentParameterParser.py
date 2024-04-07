@@ -44,8 +44,8 @@ class EnvVariable(object):
         self.createdDirectory = createdDirectory
         self.isDirectoryPath = expectedDirectory or createdDirectory
         self.required = required
-        self.isArgument = not flag is None
-        self.positionalArg = type(flag) == int
+        self.isArgument = flag is not None
+        self.positionalArg = isinstance(flag, int)
         self.logLevel = logLevel
         self.externalValidation = externalValidation
         self.setValueValidations()
@@ -168,7 +168,7 @@ class EnvVariable(object):
 
     def passedArgumentAssertions(self):
         failures = {}
-        assertion = type(self.name) == str
+        assertion = isinstance(self.name, str)
         if assertionFails(assertion):
             failures["NameTypeCheck"] = "Name value must be of string type. Given value was %s of type %s" %(self.name, type(self.name))
         assertion = self.name != ""
@@ -180,7 +180,7 @@ class EnvVariable(object):
         assertion = self.hasValidTypeRequirement()
         if assertionFails(assertion):
             failures["TypeRequirementCheck"] = "Invalid type requirement given. Value passed: %s" %self.typeRequirement
-        if not self.default is None:
+        if self.default is not None:
             assertion = self.fitsTypeRequirement(self.default)
             if assertionFails(assertion):
                 failures["DefaultValueTypeCheck"] = "Invalid data type given for default. Valid types: %s. Default value: %s: %s" %(self.typeRequirement, type(self.default), self.default)
@@ -237,13 +237,13 @@ class EnvVariable(object):
             else:
                 return False
         else:
-            if not isinstance(self.typeRequirement, collections.Iterable):
+            if not isinstance(self.typeRequirement, collections.abc.Iterable):
                 return False
             else:
                 for item in self.typeRequirement:
                     if not type(item) == type:
                         return False
-                    if not item in validTypesForList:
+                    if item not in validTypesForList:
                         return False
         return True
 
@@ -259,7 +259,7 @@ class EnvVariable(object):
         if envVar[0].isdigit():
             return False
         for character in envVar:
-            if not character in validCharacters:
+            if character not in validCharacters:
                 return False
         return True
 
@@ -339,7 +339,7 @@ class EnvVariable(object):
             return self.parseBooleanArg()
         if self.positionalArg:
             return str(self.value)
-        if type(self.value) == str and self.value.startswith("="):
+        if isinstance(self.value, str) and self.value.startswith("="):
             return "%s%s" %(self.flag, self.value)
         else:
             return "%s %s" %(self.flag, self.value)
@@ -363,10 +363,10 @@ class EnvVariable(object):
         return self.value == other
 
     def __bool__(self):
-        if type(self.value) == bool:
+        if isinstance(self.value, bool):
             return self.value
         else:
-            return not self.value is None
+            return self.value is not None
 
 
 class ParameterSideLoad(EnvVariable):
@@ -391,13 +391,13 @@ class EnvParameters(object):
 
     def addParameter(self, name:str, typeRequirement:[type, list, tuple], default=None, flag:[int, str]=None, validationList:list=None, lowerBound:[int,float]=None, upperBound:[int,float]=None, expectedFile:bool=False, createdFile:bool=False, expectedDirectory:bool=False, createdDirectory:bool=False, logLevel:bool=False, required:bool = False, externalValidation:bool=False):
         parameter = EnvVariable(name, typeRequirement, default, flag, validationList, lowerBound, upperBound, expectedFile, createdFile, expectedDirectory, createdDirectory, logLevel, required, externalValidation)
-        if not parameter.environmentVariableName in self.variableNames:
+        if parameter.environmentVariableName not in self.variableNames:
             self.variableNames.add(parameter.environmentVariableName)
         else:
             logger.critical("Environment variable name collision for %s" %parameter.environmentVariableName)
             raise ArgumentValueException("Environment variable name collision for %s" %parameter.environmentVariableName)
         if parameter.isArgument:
-            if not parameter.flag in self.flags:
+            if parameter.flag not in self.flags:
                 self.flags.add(parameter.flag)
             else:
                 logger.critical("Environment variable argument flag collision for %s" %parameter.flag)
@@ -406,13 +406,13 @@ class EnvParameters(object):
 
     def sideLoadParameter(self, name:str, value, flag:[int, str]=None, expectedFile:bool=False, createdFile:bool=False, expectedDirectory:bool=False, createdDirectory:bool=False):
         parameter = ParameterSideLoad(name, type(value), default=value, validationList=[value], expectedFile=expectedFile, createdFile=createdFile, expectedDirectory=expectedDirectory, createdDirectory=createdDirectory)
-        if not parameter.environmentVariableName in self.variableNames:
+        if parameter.environmentVariableName not in self.variableNames:
             self.variableNames.add(parameter.environmentVariableName)
         else:
             logger.critical("Environment variable name collision for %s on side load" %parameter.environmentVariableName)
             raise ArgumentValueException("Environment variable name collision for %s" %parameter.environmentVariableName)
         if parameter.isArgument:
-            if not parameter.flag in self.flags:
+            if parameter.flag not in self.flags:
                 self.flags.add(parameter.flag)
             else:
                 logger.critical("Environment variable argument flag collision for %s" %parameter.flag)
@@ -470,11 +470,11 @@ class EnvParameters(object):
         if item in self.parameters:
             return self.parameters[item]
         else:
-            if not type(item) == str:
+            if not isinstance(item, str):
                 print(list(self.parameters.keys()))
                 raise AttributeError("No parameter %s was found in the parameter set" %item)
             for key in self.parameters:
-                if not type(key) == str:
+                if not isinstance(key, str):
                     continue
                 keylower = key.lower()
                 itemlower = item.lower()
