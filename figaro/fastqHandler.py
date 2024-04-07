@@ -233,10 +233,7 @@ class FastqFile(object):
         self.currentLine = 0
 
     def checkGzip(self, path):
-        try:
-            from . import gzipIdentifier
-        except ImportError:
-            import gzipIdentifier
+        from figaro import gzipIdentifier
         return gzipIdentifier.isGzipped(path)
 
     def getNextRead(self):

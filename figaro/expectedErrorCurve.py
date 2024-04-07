@@ -112,10 +112,7 @@ def makeExpectedErrorPercentileArrayForFastq(path:str, subsample:int=0, percenti
 
 
 def makeExpectedErrorPercentileArrayForFastqList(fastqList:list, subsample:int=0, percentile:int=83, primerLength:int=0):
-    try:
-        from . import easyMultiprocessing
-    except ImportError:
-        import easyMultiprocessing
+    from figaro import easyMultiprocessing
     parallelAgent = ParallelExpectedErrorPercentileAgent(subsample, percentile, primerLength)
     expectedErrorReturns = easyMultiprocessing.parallelProcessRunner(parallelAgent.calculateAverageExpectedError, fastqList)
     averageExpectedErrorMatrix = numpy.stack([expectedErrorArray[1] for expectedErrorArray in expectedErrorReturns])

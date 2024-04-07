@@ -4,7 +4,7 @@ logger = logging.getLogger(__name__)
 
 def buildQualityMatrix(path:str):
     import numpy
-    from .fastqHandler import FastqFile
+    from figaro.fastqHandler import FastqFile
     fastq = FastqFile(path, depth=1)
     qualityMatrix = []
     for read in fastq:
@@ -19,12 +19,8 @@ def buildQualityMatrixPaired(forward:str, reverse:str):
 
 def buildExpectedErrorMatrix(path:str, superLean:bool = False, startPosition:int = 0, subsample:int=0, leftTrim:int=0, rightTrim:int=0):
     import numpy
-    try:
-        from . import qualityScoreHandler
-        from .fastqHandler import FastqFile
-    except ImportError:
-        import qualityScoreHandler
-        from fastqHandler import FastqFile
+    from figaro import qualityScoreHandler
+    from figaro.fastqHandler import FastqFile
     fastq = FastqFile(path, depth = 0, subsample = subsample, leftTrim=leftTrim, rightTrim=rightTrim)
     expectedErrorMatrix = []
     dataType = 'float16'
@@ -61,7 +57,7 @@ def findCutoffByPercentile(path:str, phredScore:int, percentile:int):
 
 def makeQualityMatrix(path:str):
     import numpy
-    from . import fastqHandler
+    from figaro import fastqHandler
     readLength, variance = fastqHandler.estimateReadLength(path, getVariance=True)
     if variance != 0:
         readLength = fastqHandler.getLongestReadInFile(path)
@@ -95,10 +91,7 @@ def makeAverageExpectedErrorLine(path:str):
 
 def getEstimatedFastqFileSizeSumFromList(fastqList:list):
     import os
-    try:
-        from . import gzipIdentifier
-    except ImportError:
-        import gzipIdentifier
+    from figaro import gzipIdentifier
     sum = 0
     for fastq in fastqList:
         fileSize = os.path.getsize(fastq.filePath)
@@ -109,12 +102,8 @@ def getEstimatedFastqFileSizeSumFromList(fastqList:list):
 
 def getEstimatedFastqSizeSumFromDirectory(path:str, fileNamingStandardAlias:str):
     import os
-    try:
-        from . import fileNamingStandards
-        from . import fastqHandler
-    except ImportError:
-        import fileNamingStandards
-        import fastqHandler
+    from figaro import fileNamingStandards
+    from figaro import fastqHandler
     fileNamingStandard = fileNamingStandards.loadNamingStandard(fileNamingStandardAlias)
     if not os.path.isdir(path):
         raise NotADirectoryError("Unable to find a directory at %s" %path)
