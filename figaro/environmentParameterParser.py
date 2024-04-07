@@ -237,7 +237,7 @@ class EnvVariable(object):
             else:
                 return False
         else:
-            if not isinstance(self.typeRequirement, collections.Iterable):
+            if not isinstance(self.typeRequirement, collections.abc.Iterable):
                 return False
             else:
                 for item in self.typeRequirement:

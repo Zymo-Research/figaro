@@ -1,4 +1,11 @@
+#!/usr/bin/env python3
+
 import logging
+import datetime
+import os
+import sys
+import argparse
+import json
 
 from figaro import environmentParameterParser
 from figaro import fileNamingStandards
@@ -8,7 +15,6 @@ from figaro.defaults import standard as default
 
 
 def getApplicationParameters():
-    import sys
     if len(sys.argv) > 1:
         return getApplicationParametersFromCommandLine()
     parameters = environmentParameterParser.EnvParameters()
@@ -38,8 +44,6 @@ def getApplicationParameters():
 
 
 def parseArgs():
-    import argparse
-    import os
     parser = argparse.ArgumentParser()
     parser.add_argument("-o", "--outputDirectory", help = "Directory for outputs", default = os.getcwd())
     parser.add_argument("-a", "--ampliconLength", help = "Length of amplicon (not including primers)", required=True, type=int)
@@ -56,7 +60,6 @@ def parseArgs():
 
 
 def getApplicationParametersFromCommandLine():
-    import os
     args = parseArgs()
     outputFileName = args.outputFileName
     ampliconLength = args.ampliconLength
@@ -106,8 +109,6 @@ def getApplicationParametersFromCommandLine():
 
 
 def getLoggingParameters():
-    import sys
-    import os
     loggingParameters = environmentParameterParser.EnvParameters()
     if len(sys.argv) > 1:
         args = parseArgs()
@@ -155,7 +156,6 @@ def setLogging():
 
 
 def makeResultJSON(resultTable:list, indent:int=0):
-    import json
     resultDictList = []
     for result in resultTable:
         resultDictList.append(result.toDict())
@@ -163,7 +163,6 @@ def makeResultJSON(resultTable:list, indent:int=0):
 
 
 def saveResultOutput(outputDirectory:str, outputResultTableFileName:str, resultTable:list, forwardCurve, reverseCurve):
-    import os
     outputResultTablePath = os.path.join(outputDirectory, outputResultTableFileName)
     outputResultTableFile = open(outputResultTablePath, 'w')
     outputResultTableFile.write(makeResultJSON(resultTable, indent=4))
@@ -186,7 +185,6 @@ def saveResultOutput(outputDirectory:str, outputResultTableFileName:str, resultT
 
 
 def runAnalysis(inputDirectory:str, ampliconLength:int, forwardPrimerLength:int, reversePrimerLength:int, minimumOverlap:int=20, fileNamingStandard:str="nononsense", subsample:int = -1, percentile:int=83):
-    import os
     if not os.path.isdir(inputDirectory):
         raise NotADirectoryError("Unable to find directory at %s" %inputDirectory)
     if subsample == -1:
@@ -197,8 +195,6 @@ def runAnalysis(inputDirectory:str, ampliconLength:int, forwardPrimerLength:int,
     return resultTable, forwardCurve, reverseCurve
 
 def main():
-    import datetime
-    import os
     startTime = datetime.datetime.now()
     setLogging()
     parameters = getApplicationParameters()

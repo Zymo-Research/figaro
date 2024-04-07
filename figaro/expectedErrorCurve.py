@@ -12,7 +12,7 @@ class ExponentialFit(object):
 
     __slots__ = ['a', 'b', 'c', 'covariance', 'rSquared', 'curvePNG']
 
-    def __init__(self, a:float, b:float, c:float, covariance:collections.Iterable = None, rSquared:float = None, curvePNG:str=None):
+    def __init__(self, a:float, b:float, c:float, covariance:collections.abc.Iterable = None, rSquared:float = None, curvePNG:str=None):
         self.a = a
         self.b = b
         self.c = c
@@ -37,7 +37,7 @@ def exponentialPrototypeFunction(x, a, b, c):
     return a * numpy.exp(b * x) + c
 
 
-def fitExponentialCurve(xValues:collections.Iterable, yValues:collections.Iterable, generateImage:bool=False, plotName:str="Expected error by position"):
+def fitExponentialCurve(xValues:collections.abc.Iterable, yValues:collections.abc.Iterable, generateImage:bool=False, plotName:str="Expected error by position"):
     import scipy.optimize
     import scipy.stats
     coefficients, covariance = scipy.optimize.curve_fit(exponentialPrototypeFunction, xValues, yValues, p0=(0.03, 0.015, 0), bounds=((-2, -1, -8), (2, 1, 8)))
@@ -132,7 +132,7 @@ def makeExpectedErrorPercentileArraysForDirectory(path:str, namingStandard:typin
     return forwardExpectedErrorArray, reverseExpectedErrorArray
 
 
-def makeXAndYValuesForPositionArray(positionArray:collections.Iterable):
+def makeXAndYValuesForPositionArray(positionArray:collections.abc.Iterable):
     xValues = []
     yValues = []
     for position, value in enumerate(positionArray):
