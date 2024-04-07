@@ -1,13 +1,10 @@
 import os
 import logging
 import typing
+from figaro import qualityScoreHandler
+from figaro import fileNamingStandards
+
 logger = logging.getLogger(__name__)
-try:
-    from . import qualityScoreHandler
-    from . import fileNamingStandards
-except ImportError:
-    import qualityScoreHandler
-    import fileNamingStandards
 
 class ReadMetadataLine(object):
 

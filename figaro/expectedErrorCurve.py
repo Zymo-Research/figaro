@@ -1,16 +1,11 @@
 
-try:
-    from . import fileNamingStandards
-    from . import fastqHandler
-    from . import fastqAnalysis
-except ImportError:
-    import fileNamingStandards
-    import fastqHandler
-    import fastqAnalysis
-
 import numpy
 import typing
 import collections
+
+from figaro import fileNamingStandards
+from figaro import fastqHandler
+from figaro import fastqAnalysis
 
 
 class ExponentialFit(object):
