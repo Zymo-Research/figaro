@@ -2,7 +2,7 @@ try:
     from . import fileNamingStandards
     from . import fastqHandler
     from . import fastqAnalysis
-except:
+except ImportError:
     import fileNamingStandards, fastqHandler, fastqAnalysis
 import numpy
 import typing
