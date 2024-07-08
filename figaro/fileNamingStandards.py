@@ -77,8 +77,8 @@ class NoNonsenseNamingStandard(NamingStandard):
         import re
         import os
 
-        regex = "_R?([12])(_\\d\\d\\d)?$"
-        baseName = re.sub("\.(fq|fastq)(.gz)?$", "", os.path.basename(fileName))
+        regex = r"_R?([12])(_\\d\\d\\d)?$"
+        baseName = re.sub(r"\.(fq|fastq)(.gz)?$", "", os.path.basename(fileName))
         regexResult = re.search(regex, baseName)
         if not regexResult:
             raise ValueError(
